@@ -93,3 +93,9 @@ def reset_login_limiter():
     login_limiter.reset_all()
     yield
     login_limiter.reset_all()
+
+
+@pytest.fixture(autouse=True)
+def temp_storage_root(tmp_path, monkeypatch):
+    monkeypatch.setattr(settings, "storage_root", str(tmp_path / "files"))
+    yield

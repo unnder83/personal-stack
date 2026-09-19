@@ -1,8 +1,13 @@
+import os
+
 import httpx
 import pytest
 from httpx import ASGITransport
 
-from app.main import app
+os.environ.setdefault("SECRET_KEY", "test-secret")
+os.environ.setdefault("DATABASE_URL", "mysql+asyncmy://app:app@127.0.0.1:3306/personal_stack_test")
+
+from app.main import app  # noqa: E402
 
 
 @pytest.fixture

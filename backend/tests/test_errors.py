@@ -18,12 +18,16 @@ def build_app() -> FastAPI:
     async def item(item_id: int):
         return {"item_id": item_id}
 
+    @test_app.get("/crashes")
+    async def crashes():
+        raise RuntimeError("secret internal detail")
+
     return test_app
 
 
 @pytest.fixture
 async def error_client():
-    transport = ASGITransport(app=build_app())
+    transport = ASGITransport(app=build_app(), raise_app_exceptions=False)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
         yield c
 
@@ -51,3 +55,11 @@ async def test_validation_error_uses_code_and_message(error_client):
     body = response.json()
     assert body["code"] == "validation_error"
     assert "message" in body
+
+
+async def test_unhandled_exception_returns_internal_error_without_details(error_client):
+    response = await error_client.get("/crashes")
+
+    assert response.status_code == 500
+    assert response.json() == {"code": "internal_error", "message": "服务器内部错误"}
+    assert "secret internal detail" not in response.text

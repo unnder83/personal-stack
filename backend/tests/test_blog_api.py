@@ -118,6 +118,22 @@ async def test_page_size_over_limit_rejected(client):
     assert response.json()["code"] == "validation_error"
 
 
+async def test_page_over_upper_bound_rejected(client):
+    response = await client.get("/api/posts", params={"page": 100001})
+
+    assert response.status_code == 422
+    assert response.json()["code"] == "validation_error"
+
+
+async def test_overlong_tag_name_returns_422(client, db_session):
+    await login_as_admin(client, db_session)
+
+    response = await client.post("/api/admin/posts", json=post_payload(tags=["x" * 100]))
+
+    assert response.status_code == 422
+    assert response.json()["code"] == "validation_error"
+
+
 async def test_admin_list_filters_by_status(client, db_session):
     await login_as_admin(client, db_session)
     await client.post("/api/admin/posts", json=post_payload(status="draft", slug="d1"))

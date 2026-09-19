@@ -9,6 +9,8 @@ export default function AdminPostsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const status = searchParams.get('status')
   const [posts, setPosts] = useState<PostAdminSummary[]>([])
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [reloadKey, setReloadKey] = useState(0)
@@ -16,9 +18,13 @@ export default function AdminPostsPage() {
   useEffect(() => {
     let cancelled = false
     setLoading(true)
-    listAdminPosts({ status: status ?? undefined })
+    listAdminPosts({ status: status ?? undefined, page })
       .then((data) => {
-        if (!cancelled) setPosts(data.items)
+        if (!cancelled) {
+          setPosts(data.items)
+          setTotal(data.total)
+          setError('')
+        }
       })
       .catch((err) => {
         if (!cancelled) setError(err instanceof Error ? err.message : '加载失败')
@@ -29,7 +35,7 @@ export default function AdminPostsPage() {
     return () => {
       cancelled = true
     }
-  }, [status, reloadKey])
+  }, [status, page, reloadKey])
 
   async function handleDelete(id: number) {
     try {
@@ -45,7 +51,10 @@ export default function AdminPostsPage() {
     const params = new URLSearchParams()
     if (next) params.set('status', next)
     setSearchParams(params)
+    setPage(1)
   }
+
+  const totalPages = Math.max(1, Math.ceil(total / 20))
 
   return (
     <main>
@@ -89,6 +98,19 @@ export default function AdminPostsPage() {
         </tbody>
       </table>
       {!loading && posts.length === 0 && <p>暂无文章</p>}
+      {totalPages > 1 && (
+        <footer>
+          <button onClick={() => setPage(page - 1)} disabled={page <= 1}>
+            上一页
+          </button>
+          <span>
+            第 {page} / {totalPages} 页
+          </span>
+          <button onClick={() => setPage(page + 1)} disabled={page >= totalPages}>
+            下一页
+          </button>
+        </footer>
+      )}
     </main>
   )
 }

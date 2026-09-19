@@ -74,4 +74,34 @@ describe('BlogListPage', () => {
 
     expect(await screen.findByText('还没有发布文章')).toBeInTheDocument()
   })
+
+  it('含特殊字符的标签链接正确编码', async () => {
+    mockFetch({
+      '/api/tags': [{ id: 1, name: 'C++', slug: 'c++' }],
+      '/api/posts': {
+        items: [
+          {
+            id: 1,
+            title: '文章',
+            slug: 'one',
+            summary: null,
+            published_at: '2026-09-19T12:00:00',
+            tags: [{ id: 1, name: 'C++', slug: 'c++' }],
+          },
+        ],
+        total: 1,
+        page: 1,
+        page_size: 20,
+      },
+    })
+
+    render(
+      <MemoryRouter>
+        <BlogListPage />
+      </MemoryRouter>,
+    )
+
+    const link = await screen.findByRole('link', { name: 'C++' })
+    expect(link).toHaveAttribute('href', '/?tag=c%2B%2B')
+  })
 })

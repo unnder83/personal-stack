@@ -84,7 +84,7 @@ export default function BlogListPage() {
             {post.summary && <p>{post.summary}</p>}
             <p>
               {post.tags.map((item) => (
-                <Link key={item.slug} to={`/?tag=${item.slug}`}>
+                <Link key={item.slug} to={`/?tag=${encodeURIComponent(item.slug)}`}>
                   {item.name}
                 </Link>
               ))}

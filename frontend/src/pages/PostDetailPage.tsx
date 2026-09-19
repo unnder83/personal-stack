@@ -44,7 +44,7 @@ export default function PostDetailPage() {
       {post.published_at && <time>{post.published_at.slice(0, 10)}</time>}
       <p>
         {post.tags.map((tag) => (
-          <Link key={tag.slug} to={`/?tag=${tag.slug}`}>
+          <Link key={tag.slug} to={`/?tag=${encodeURIComponent(tag.slug)}`}>
             {tag.name}
           </Link>
         ))}

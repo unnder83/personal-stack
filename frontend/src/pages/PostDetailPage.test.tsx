@@ -62,4 +62,32 @@ describe('PostDetailPage', () => {
 
     expect(await screen.findByText('文章不存在')).toBeInTheDocument()
   })
+
+  it('含特殊字符的标签链接正确编码', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            id: 1,
+            title: '第一篇文章',
+            slug: 'first',
+            summary: null,
+            published_at: '2026-09-19T12:00:00',
+            tags: [{ id: 1, name: 'C#', slug: 'c#' }],
+            content_md: '正文',
+            status: 'published',
+            created_at: '2026-09-19T12:00:00',
+            updated_at: '2026-09-19T12:00:00',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        ),
+      ),
+    )
+
+    renderDetail()
+
+    const link = await screen.findByRole('link', { name: 'C#' })
+    expect(link).toHaveAttribute('href', '/?tag=c%23')
+  })
 })

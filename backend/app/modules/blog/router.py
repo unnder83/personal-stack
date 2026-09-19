@@ -23,7 +23,7 @@ admin_router = APIRouter(
 @public_router.get("/posts", response_model=PostListResponse)
 async def list_posts(
     tag: str | None = None,
-    page: int = Query(default=1, ge=1),
+    page: int = Query(default=1, ge=1, le=100000),
     page_size: int = Query(default=20, ge=1, le=100),
     session: AsyncSession = Depends(get_db),
 ) -> PostListResponse:
@@ -53,7 +53,7 @@ async def list_tags(session: AsyncSession = Depends(get_db)) -> list[TagOut]:
 @admin_router.get("", response_model=PostAdminListResponse)
 async def list_admin_posts(
     status: str | None = None,
-    page: int = Query(default=1, ge=1),
+    page: int = Query(default=1, ge=1, le=100000),
     page_size: int = Query(default=20, ge=1, le=100),
     session: AsyncSession = Depends(get_db),
 ) -> PostAdminListResponse:

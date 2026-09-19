@@ -80,4 +80,39 @@ describe('AdminPostsPage', () => {
       expect(fetch).toHaveBeenCalledWith('/api/admin/posts/1', { method: 'DELETE' })
     })
   })
+
+  it('文章超过一页时可翻页', async () => {
+    stubFetch([
+      ['GET', '/api/auth/me', 200, { id: 1, username: 'admin' }],
+      [
+        'GET',
+        '/api/admin/posts',
+        200,
+        {
+          items: Array.from({ length: 20 }, (_, index) => ({
+            id: index + 1,
+            title: `文章 ${index + 1}`,
+            slug: `post-${index + 1}`,
+            status: 'published',
+            published_at: '2026-09-19T12:00:00',
+            updated_at: '2026-09-19T12:00:00',
+          })),
+          total: 25,
+          page: 1,
+          page_size: 20,
+        },
+      ],
+    ])
+
+    renderPage()
+
+    expect(await screen.findByText('文章 1')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: '下一页' }))
+
+    await waitFor(() => {
+      const calls = (fetch as ReturnType<typeof vi.fn>).mock.calls.map((call) => String(call[0]))
+      expect(calls.some((url) => url.includes('page=2'))).toBe(true)
+    })
+  })
 })

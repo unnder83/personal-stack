@@ -1,8 +1,10 @@
 import re
 from datetime import datetime
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator
+
+TagName = Annotated[str, StringConstraints(strip_whitespace=True, max_length=50)]
 
 
 class TagOut(BaseModel):
@@ -48,7 +50,7 @@ class PostInput(BaseModel):
     summary: str | None = Field(default=None, max_length=500)
     content_md: str = Field(min_length=1, max_length=200000)
     status: Literal["draft", "published"] = "draft"
-    tags: list[str] = Field(default_factory=list, max_length=20)
+    tags: list[TagName] = Field(default_factory=list, max_length=20)
 
     @field_validator("slug")
     @classmethod

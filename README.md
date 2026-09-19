@@ -19,16 +19,23 @@
 ```bash
 cp deploy/.env.example deploy/.env   # 首次
 make setup-backend                   # 首次：创建后端 venv 并安装依赖
-make dev-up
+make dev-up                          # 启动 mysql + api + web
+make migrate                         # 首次：执行数据库迁移
+make seed-admin                      # 首次：创建管理员（读取 deploy/.env 中的 ADMIN_*）
 ```
 
-- 前端：http://localhost:5173
+开发管理员账号来自 `deploy/.env` 的 `ADMIN_USERNAME` / `ADMIN_PASSWORD`（默认 `admin` / `dev-admin-password`，请自行修改）。
+
+- 前端：http://localhost:5173 （登录页 `/login`，管理页 `/admin`）
 - 后端健康检查：http://localhost:8000/api/health
 
 ## 常用命令
 
 ```bash
 make setup-backend   # 首次：创建 backend/.venv 并安装依赖
+make db-up           # 只启动 MySQL（测试需要）
+make migrate         # 执行数据库迁移
+make seed-admin      # 创建/确认管理员账号（幂等）
 make dev-up          # 启动开发环境
 make dev-down        # 停止
 make dev-logs        # 跟踪日志

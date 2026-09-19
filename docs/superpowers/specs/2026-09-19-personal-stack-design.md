@@ -225,13 +225,18 @@ GET    /api/storage/usage         已用空间统计
 
 | 目标 | 结果 |
 |---|---|
-| `github.com`（网页与 git clone） | 不可达（超时） |
+| `github.com` HTTPS（网页与 git clone） | 不可达（超时） |
+| `github.com:22` / `ssh.github.com:443`（SSH） | **可达** |
 | `api.github.com` | 可达（200） |
 | `codeload.github.com` | 可达 |
 | `ghcr.io` | 可达 |
 | `pipelines/broker/results-receiver.actions.githubusercontent.com` | 可达 |
 
-对策：CD **不使用 `actions/checkout`**，改为通过 `api.github.com` 下载指定 commit 的 tarball 解压部署。若自托管 Runner 后续不可用，兜底方案为 VM 上 systemd timer 轮询 GHCR 镜像摘要，发现更新即 `pull + up`。
+对策：
+
+- 代码推送/拉取使用 **SSH 远程**（`git@github.com:...`，必要时切 `ssh.github.com:443`），不走 HTTPS clone。
+- CD **不使用 `actions/checkout`**（其默认走 HTTPS），改为通过 `api.github.com` 下载指定 commit 的 tarball 解压部署。
+- 若自托管 Runner 后续不可用，兜底方案为 VM 上 systemd timer 轮询 GHCR 镜像摘要，发现更新即 `pull + up`。
 
 ### 10.2 CI（GitHub 云端 Runner：push / PR）
 
@@ -309,7 +314,7 @@ GET    /api/storage/usage         已用空间统计
 
 | 风险 | 影响 | 对策 |
 |---|---|---|
-| `github.com` 不可达 | checkout/自动部署失败 | 用 `api.github.com` tarball 绕行；Runner 端点已实测可达；保留轮询兜底方案 |
+| `github.com` HTTPS 不可达 | 无法用 HTTPS 推送/拉取代码 | 改用 SSH 远程（端口已实测可达）；CD 用 `api.github.com` tarball；Runner 端点已实测可达；保留轮询兜底方案 |
 | 内存仅 2.6 GB | 监控栈上线后 OOM | 监控分期；已配置 2 GB swap；上线后据 Grafana 数据调整 |
 | 磁盘仅 16 GB | 备份/日志/网盘写满根分区 | 日志轮转、备份保留策略、磁盘用量纳入监控告警 |
 | 域名/映射未就绪 | M4 阻塞 | 先内网 HTTP 闭环；域名与 80/443 作为 M4 前置条件在计划中显式列出 |

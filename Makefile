@@ -1,6 +1,9 @@
 DEV_COMPOSE := docker compose -f deploy/compose.dev.yaml
 
-.PHONY: dev-up dev-down dev-logs dev-ps test-backend lint-backend check-backend test-frontend build-frontend check-frontend
+.PHONY: setup-backend dev-up dev-down dev-logs dev-ps test-backend lint-backend check-backend test-frontend build-frontend check-frontend
+
+setup-backend:
+	cd backend && python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 
 dev-up:
 	$(DEV_COMPOSE) up -d --build

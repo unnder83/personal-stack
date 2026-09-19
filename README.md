@@ -18,6 +18,7 @@
 
 ```bash
 cp deploy/.env.example deploy/.env   # 首次
+make setup-backend                   # 首次：创建后端 venv 并安装依赖
 make dev-up
 ```
 
@@ -27,6 +28,7 @@ make dev-up
 ## 常用命令
 
 ```bash
+make setup-backend   # 首次：创建 backend/.venv 并安装依赖
 make dev-up          # 启动开发环境
 make dev-down        # 停止
 make dev-logs        # 跟踪日志
@@ -39,4 +41,4 @@ make check-frontend  # 前端类型检查 + lint + 测试
 
 - Docker CE + Compose v2（安装脚本：`deploy/ops/host/install-docker.sh`）
 - GNU Make（Rocky：`dnf install -y make`）
-- 宿主机无需安装 Python / Node（开发依赖都在容器或 venv 中）
+- 宿主机 Python 仅用于创建后端测试 venv（`make setup-backend`）；前端依赖都在容器中，无需安装 Node

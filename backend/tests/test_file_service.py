@@ -69,10 +69,18 @@ async def test_upload_oversize_returns_413(db_session, owner_id, store, monkeypa
 
 async def test_duplicate_content_shares_blob(db_session, owner_id, store):
     first = await service.upload_file(
-        db_session, owner_id, make_upload(b"same", filename="a.bin"), folder_id=None, blob_store=store
+        db_session,
+        owner_id,
+        make_upload(b"same", filename="a.bin"),
+        folder_id=None,
+        blob_store=store,
     )
     second = await service.upload_file(
-        db_session, owner_id, make_upload(b"same", filename="b.bin"), folder_id=None, blob_store=store
+        db_session,
+        owner_id,
+        make_upload(b"same", filename="b.bin"),
+        folder_id=None,
+        blob_store=store,
     )
 
     assert first.storage_path == second.storage_path
@@ -80,10 +88,18 @@ async def test_duplicate_content_shares_blob(db_session, owner_id, store):
 
 async def test_delete_keeps_blob_while_referenced(db_session, owner_id, store):
     first = await service.upload_file(
-        db_session, owner_id, make_upload(b"same", filename="a.bin"), folder_id=None, blob_store=store
+        db_session,
+        owner_id,
+        make_upload(b"same", filename="a.bin"),
+        folder_id=None,
+        blob_store=store,
     )
     second = await service.upload_file(
-        db_session, owner_id, make_upload(b"same", filename="b.bin"), folder_id=None, blob_store=store
+        db_session,
+        owner_id,
+        make_upload(b"same", filename="b.bin"),
+        folder_id=None,
+        blob_store=store,
     )
 
     await service.delete_file(db_session, owner_id, first, blob_store=store)
@@ -119,10 +135,18 @@ async def test_rename_and_move_file(db_session, owner_id, store):
 
 async def test_usage_sums_size_and_count(db_session, owner_id, store):
     await service.upload_file(
-        db_session, owner_id, make_upload(b"12345", filename="a.bin"), folder_id=None, blob_store=store
+        db_session,
+        owner_id,
+        make_upload(b"12345", filename="a.bin"),
+        folder_id=None,
+        blob_store=store,
     )
     await service.upload_file(
-        db_session, owner_id, make_upload(b"123", filename="b.bin"), folder_id=None, blob_store=store
+        db_session,
+        owner_id,
+        make_upload(b"123", filename="b.bin"),
+        folder_id=None,
+        blob_store=store,
     )
 
     usage = await service.usage(db_session, owner_id)

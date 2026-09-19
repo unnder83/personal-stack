@@ -31,6 +31,9 @@ services:
       DATABASE_URL: mysql+asyncmy://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}
       SECRET_KEY: ${SECRET_KEY}
       MAX_UPLOAD_SIZE_MB: ${MAX_UPLOAD_SIZE_MB}
+      COOKIE_SECURE: "false"
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     ports:
       - "8000:8000"
     volumes:

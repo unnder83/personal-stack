@@ -1,12 +1,18 @@
 DEV_COMPOSE := docker compose -f deploy/compose.dev.yaml
 
-.PHONY: setup-backend db-up dev-up dev-down dev-logs dev-ps test-backend lint-backend check-backend test-frontend build-frontend check-frontend
+.PHONY: setup-backend db-up migrate seed-admin dev-up dev-down dev-logs dev-ps test-backend lint-backend check-backend test-frontend build-frontend check-frontend
 
 setup-backend:
 	cd backend && python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 
 db-up:
 	$(DEV_COMPOSE) up -d mysql --wait
+
+migrate:
+	$(DEV_COMPOSE) exec api alembic upgrade head
+
+seed-admin:
+	$(DEV_COMPOSE) exec api python -m app.scripts.seed_admin
 
 dev-up:
 	$(DEV_COMPOSE) up -d --build

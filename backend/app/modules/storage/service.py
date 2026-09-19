@@ -1,8 +1,10 @@
 from datetime import UTC, datetime
 
+from fastapi import UploadFile
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.errors import AppError
 from app.modules.storage import schemas
 from app.modules.storage.blobstore import LocalBlobStore
@@ -220,3 +222,92 @@ async def _delete_file_row(
     await session.delete(file_row)
     if shared == 0:
         blob_store.delete(file_row.storage_path)
+
+
+async def get_file(session: AsyncSession, owner_id: int, file_id: int) -> StoredFile:
+    file_row = (
+        await session.execute(
+            select(StoredFile).where(StoredFile.id == file_id, StoredFile.owner_id == owner_id)
+        )
+    ).scalar_one_or_none()
+    if file_row is None:
+        raise AppError("not_found", "文件不存在", 404)
+    return file_row
+
+
+async def _file_name_taken(
+    session: AsyncSession,
+    owner_id: int,
+    folder_id: int | None,
+    name: str,
+    exclude_file_id: int | None = None,
+) -> bool:
+    stmt = select(StoredFile.id).where(
+        StoredFile.owner_id == owner_id, StoredFile.folder_id == folder_id, StoredFile.name == name
+    )
+    if exclude_file_id is not None:
+        stmt = stmt.where(StoredFile.id != exclude_file_id)
+    return (await session.execute(stmt.limit(1))).scalar_one_or_none() is not None
+
+
+async def upload_file(
+    session: AsyncSession,
+    owner_id: int,
+    upload: UploadFile,
+    folder_id: int | None,
+    blob_store: LocalBlobStore,
+) -> StoredFile:
+    name = validate_name(upload.filename or "未命名文件")
+    await _ensure_parent(session, owner_id, folder_id)
+    if await _file_name_taken(session, owner_id, folder_id, name):
+        raise AppError("name_conflict", "同名文件已存在", 409)
+    max_bytes = settings.max_upload_size_mb * 1024 * 1024
+    storage_path, size, digest = blob_store.save_upload(owner_id, upload, max_bytes)
+    file_row = StoredFile(
+        owner_id=owner_id,
+        folder_id=folder_id,
+        name=name,
+        storage_path=storage_path,
+        size=size,
+        mime_type=upload.content_type or "application/octet-stream",
+        sha256=digest,
+    )
+    session.add(file_row)
+    await session.commit()
+    return file_row
+
+
+async def update_file(
+    session: AsyncSession, owner_id: int, file_row: StoredFile, payload: schemas.FileUpdate
+) -> StoredFile:
+    changes = payload.model_dump(exclude_unset=True)
+    if "name" in changes and changes["name"] is not None:
+        file_row.name = validate_name(changes["name"])
+    if "folder_id" in changes:
+        new_folder = changes["folder_id"]
+        if new_folder is not None:
+            await get_folder(session, owner_id, new_folder)
+        file_row.folder_id = new_folder
+    if await _file_name_taken(
+        session, owner_id, file_row.folder_id, file_row.name, exclude_file_id=file_row.id
+    ):
+        raise AppError("name_conflict", "同名文件已存在", 409)
+    await session.commit()
+    return file_row
+
+
+async def delete_file(
+    session: AsyncSession, owner_id: int, file_row: StoredFile, blob_store: LocalBlobStore
+) -> None:
+    await _delete_file_row(session, file_row, blob_store)
+    await session.commit()
+
+
+async def usage(session: AsyncSession, owner_id: int) -> schemas.StorageUsage:
+    result = await session.execute(
+        select(func.coalesce(func.sum(StoredFile.size), 0), func.count()).where(
+            StoredFile.owner_id == owner_id
+        )
+    )
+    used_bytes, file_count = result.one()
+    return schemas.StorageUsage(used_bytes=int(used_bytes), file_count=int(file_count))

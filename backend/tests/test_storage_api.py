@@ -150,3 +150,43 @@ async def test_non_empty_folder_and_recursive_delete(client, db_session):
     recursive = await client.delete(f"/api/folders/{folder_id}", params={"recursive": "true"})
     assert recursive.status_code == 200
     assert (await client.get("/api/storage/usage")).json()["file_count"] == 0
+
+
+async def test_overlong_mime_type_is_truncated(client, db_session):
+    await login_as_admin(client, db_session)
+
+    upload = await client.post("/api/files/upload", files={"file": ("a.bin", b"x", "a" * 120)})
+
+    assert upload.status_code == 200
+    assert len(upload.json()["mime_type"]) == 100
+
+
+async def test_owner_isolation(client, db_session):
+    from app.core.security import create_access_token, hash_password
+    from app.modules.auth.models import User
+
+    owner = User(username="alice", password_hash=hash_password("secret123"))
+    stranger = User(username="mallory", password_hash=hash_password("secret123"))
+    db_session.add_all([owner, stranger])
+    await db_session.flush()
+
+    client.cookies.set("access_token", create_access_token(owner.id))
+    folder = await client.post("/api/folders", json={"name": "私有", "parent_id": None})
+    folder_id = folder.json()["id"]
+    upload = await client.post(
+        "/api/files/upload", files={"file": ("secret.txt", b"top", "text/plain")}
+    )
+    file_id = upload.json()["id"]
+
+    client.cookies.set("access_token", create_access_token(stranger.id))
+
+    assert (await client.get("/api/folders")).json()["folders"] == []
+    assert (await client.get("/api/folders", params={"parent_id": folder_id})).status_code == 404
+    assert (
+        await client.patch(f"/api/folders/{folder_id}", json={"name": "改名"})
+    ).status_code == 404
+    assert (await client.delete(f"/api/folders/{folder_id}")).status_code == 404
+    assert (await client.patch(f"/api/files/{file_id}", json={"name": "改名"})).status_code == 404
+    assert (await client.delete(f"/api/files/{file_id}")).status_code == 404
+    assert (await client.get(f"/api/files/{file_id}/download")).status_code == 404
+    assert (await client.get("/api/storage/usage")).json() == {"used_bytes": 0, "file_count": 0}

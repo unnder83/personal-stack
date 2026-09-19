@@ -269,7 +269,7 @@ async def upload_file(
         name=name,
         storage_path=storage_path,
         size=size,
-        mime_type=upload.content_type or "application/octet-stream",
+        mime_type=(upload.content_type or "application/octet-stream")[:100],
         sha256=digest,
     )
     session.add(file_row)

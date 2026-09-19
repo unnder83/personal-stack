@@ -101,6 +101,20 @@ export default function DrivePage() {
     }
   }
 
+  async function handleMoveFolder(id: number) {
+    const options = tree.map((node) => `${node.id}: ${node.path}`).join('\n')
+    const answer = window.prompt(`输入目标文件夹 ID（留空表示根目录）：\n${options}`)
+    if (answer === null) return
+    const target = answer.trim() === '' ? null : Number(answer)
+    if (target !== null && Number.isNaN(target)) return
+    try {
+      await updateFolder(id, { parent_id: target })
+      reload()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '移动失败')
+    }
+  }
+
   async function handleDeleteFolder(id: number, name: string) {
     if (!window.confirm(`删除文件夹「${name}」？其中的内容也会被删除。`)) return
     try {
@@ -197,6 +211,7 @@ export default function DrivePage() {
               <td>—</td>
               <td>
                 <button onClick={() => handleRenameFolder(folder.id, folder.name)}>重命名</button>
+                <button onClick={() => handleMoveFolder(folder.id)}>移动</button>
                 <button onClick={() => handleDeleteFolder(folder.id, folder.name)}>
                   删除文件夹 {folder.name}
                 </button>

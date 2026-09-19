@@ -105,8 +105,7 @@ describe('DrivePage', () => {
     })
   })
 
-  it('上传文件使用 FormData', async () => {
-    stubFetch([
+  it('上传文件使用 FormData', async () => {    stubFetch([
       ['GET', '/api/auth/me', 200, { id: 1, username: 'admin' }],
       ['GET', '/api/folders/tree', 200, []],
       ['GET', '/api/folders', 200, EMPTY_CONTENTS],
@@ -176,6 +175,50 @@ describe('DrivePage', () => {
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith('/api/files/2', { method: 'DELETE' })
+    })
+  })
+
+  it('移动文件夹会提交 PATCH 与 parent_id', async () => {
+    stubFetch([
+      ['GET', '/api/auth/me', 200, { id: 1, username: 'admin' }],
+      [
+        'GET',
+        '/api/folders/tree',
+        200,
+        [{ id: 3, name: '目标', parent_id: null, path: '目标' }],
+      ],
+      [
+        'GET',
+        '/api/folders',
+        200,
+        {
+          folder: null,
+          breadcrumb: [],
+          folders: [{ id: 1, name: '目录', parent_id: null, created_at: '', updated_at: '' }],
+          files: [],
+        },
+      ],
+      ['GET', '/api/storage/usage', 200, { used_bytes: 0, file_count: 0 }],
+      [
+        'PATCH',
+        '/api/folders/1',
+        200,
+        { id: 1, name: '目录', parent_id: 3, created_at: '', updated_at: '' },
+      ],
+    ])
+    vi.spyOn(window, 'prompt').mockReturnValue('3')
+
+    renderDrive()
+    fireEvent.click(await screen.findByRole('button', { name: '移动' }))
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        '/api/folders/1',
+        expect.objectContaining({
+          method: 'PATCH',
+          body: JSON.stringify({ parent_id: 3 }),
+        }),
+      )
     })
   })
 })

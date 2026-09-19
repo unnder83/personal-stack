@@ -62,3 +62,64 @@ export async function getPost(slug: string): Promise<PostDetail> {
 export async function listTags(): Promise<Tag[]> {
   return (await ensureOk(await fetch('/api/tags'))).json()
 }
+
+export type PostInputPayload = {
+  title: string
+  slug: string | null
+  summary: string | null
+  content_md: string
+  status: 'draft' | 'published'
+  tags: string[]
+}
+
+export type PostAdminSummary = {
+  id: number
+  title: string
+  slug: string
+  status: string
+  published_at: string | null
+  updated_at: string
+}
+
+export type PostAdminListResponse = {
+  items: PostAdminSummary[]
+  total: number
+  page: number
+  page_size: number
+}
+
+export async function listAdminPosts(params: {
+  status?: string
+  page?: number
+}): Promise<PostAdminListResponse> {
+  const search = new URLSearchParams()
+  if (params.status) search.set('status', params.status)
+  search.set('page', String(params.page ?? 1))
+  return (await ensureOk(await fetch(`/api/admin/posts?${search.toString()}`))).json()
+}
+
+export async function getAdminPost(id: number): Promise<PostDetail> {
+  return (await ensureOk(await fetch(`/api/admin/posts/${id}`))).json()
+}
+
+export async function createPost(payload: PostInputPayload): Promise<PostDetail> {
+  const response = await fetch('/api/admin/posts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  return (await ensureOk(response)).json()
+}
+
+export async function updatePost(id: number, payload: PostInputPayload): Promise<PostDetail> {
+  const response = await fetch(`/api/admin/posts/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  return (await ensureOk(response)).json()
+}
+
+export async function deletePost(id: number): Promise<void> {
+  await ensureOk(await fetch(`/api/admin/posts/${id}`, { method: 'DELETE' }))
+}

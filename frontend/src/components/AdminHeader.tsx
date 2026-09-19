@@ -1,21 +1,24 @@
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../auth/AuthContext'
 
-export default function AdminPage() {
+export function AdminHeader() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
   async function handleLogout() {
-    await logout()
-    navigate('/login')
+    try {
+      await logout()
+    } finally {
+      navigate('/login')
+    }
   }
 
   return (
-    <main>
-      <h1>管理后台</h1>
+    <header>
       <p>当前用户：{user?.username}</p>
+      <Link to="/">返回博客</Link>
       <button onClick={handleLogout}>退出登录</button>
-    </main>
+    </header>
   )
 }

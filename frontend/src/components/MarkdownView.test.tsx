@@ -18,4 +18,11 @@ describe('MarkdownView', () => {
     expect(screen.getByText('<script>alert(1)</script>')).toBeInTheDocument()
     expect(screen.getByText('加粗')).toBeInTheDocument()
   })
+
+  it('井号后无空格不构成标题（按 CommonMark 规范原样显示）', () => {
+    render(<MarkdownView content={'##没有空格的标题'} />)
+
+    expect(screen.queryByRole('heading')).toBeNull()
+    expect(screen.getByText('##没有空格的标题')).toBeInTheDocument()
+  })
 })

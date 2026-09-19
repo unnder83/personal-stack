@@ -56,6 +56,7 @@ export default function BlogListPage() {
     <main>
       <header>
         <h1>personal-stack 博客</h1>
+        <Link to="/drive">网盘</Link>
         <Link to="/admin/posts">管理后台</Link>
       </header>
 

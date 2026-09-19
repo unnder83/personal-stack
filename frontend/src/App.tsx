@@ -4,6 +4,7 @@ import { AuthProvider } from './auth/AuthContext'
 import { ProtectedRoute } from './auth/ProtectedRoute'
 import AdminPostsPage from './pages/AdminPostsPage'
 import BlogListPage from './pages/BlogListPage'
+import DrivePage from './pages/DrivePage'
 import LoginPage from './pages/LoginPage'
 import PostDetailPage from './pages/PostDetailPage'
 import PostFormPage from './pages/PostFormPage'
@@ -15,6 +16,14 @@ export default function App() {
         <Routes>
           <Route path="/" element={<BlogListPage />} />
           <Route path="/posts/:slug" element={<PostDetailPage />} />
+          <Route
+            path="/drive"
+            element={
+              <ProtectedRoute>
+                <DrivePage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/login" element={<LoginPage />} />
           <Route
             path="/admin"

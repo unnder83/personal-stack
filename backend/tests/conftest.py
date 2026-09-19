@@ -99,3 +99,14 @@ def reset_login_limiter():
 def temp_storage_root(tmp_path, monkeypatch):
     monkeypatch.setattr(settings, "storage_root", str(tmp_path / "files"))
     yield
+
+
+@pytest.fixture
+async def owner_id(db_session):
+    from app.core.security import hash_password
+    from app.modules.auth.models import User
+
+    user = User(username="owner", password_hash=hash_password("secret123"))
+    db_session.add(user)
+    await db_session.flush()
+    return user.id

@@ -9,6 +9,10 @@ class Settings(BaseSettings):
     database_url: str
     cors_origins: str = "http://localhost:5173"
     max_upload_size_mb: int = 2048
+    cookie_secure: bool = True
+    access_token_expire_days: int = 7
+    admin_username: str | None = None
+    admin_password: str | None = None
 
 
 settings = Settings()

@@ -57,13 +57,16 @@
 ### 5.1 容器拓扑（生产）
 
 ```
-Internet ──► caddy   :80/:443   反向代理 + 自动 HTTPS + 限流
-             ├─ /       ──► web  :80    Nginx 托管 React 构建产物
-             └─ /api/*  ──► api  :8000  FastAPI
-                              └──► mysql :3306（仅 compose 内网，不映射宿主机端口）
+Internet ──HTTPS──► Cloudflare 边缘
+                        │（cloudflared 出站隧道，无需公网 IP/端口映射）
+                        ▼
+                   cloudflared ──http://caddy:80──► caddy（反向代理 + 安全响应头）
+                                                    ├─ /       ──► web  :8080  Nginx 托管 React 构建产物
+                                                    └─ /api/*  ──► api  :8000  FastAPI
+                                                                     └──► mysql :3306（仅 compose 内网）
 ```
 
-共 4 个容器：`caddy`、`web`、`api`、`mysql`。
+共 5 个容器：`cloudflared`、`caddy`、`web`、`api`、`mysql`。生产不发布任何宿主机端口（仅 SSH 对宿主可达），TLS 由 Cloudflare 边缘终止，隧道流量加密。
 
 ### 5.2 技术栈
 
@@ -286,9 +289,10 @@ GET    /api/storage/usage         已用空间统计
 
 ### 11.4 HTTPS 节奏
 
-- 域名与端口映射就绪前：局域网以 HTTP/自签证书完成功能闭环。
-- 映射就绪后：Caddy 自动申请 Let's Encrypt 证书，改少量配置即可切换。
-- 上线前置条件（M4 开始前需提供）：一个域名、80/443 端口映射到本机。
+- 公网入口采用 **Cloudflare Tunnel**（用户已有 Cloudflare 账号与域名）：云主机无需公网 IP 或端口映射，`cloudflared` 在 compose 内出站建隧道，边缘提供 HTTPS。
+- 生产不发布 80/443；本机防火墙仅放行 SSH。
+- 真实客户端 IP 依赖 `cloudflared → Caddy（trusted_proxies）→ uvicorn（--proxy-headers --forwarded-allow-ips）` 三段配置，缺一不可；否则登录限流退化为全站共享桶（M4 验收项）。
+- 若后续改为自有公网入口，可切换为 Caddy 直接终止 TLS 并申请 Let's Encrypt，应用侧无需改动。
 
 ## 12. 测试策略
 

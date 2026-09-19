@@ -75,3 +75,12 @@ async def client(db_session):
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
         yield c
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(autouse=True)
+def reset_login_limiter():
+    from app.modules.auth.rate_limit import login_limiter
+
+    login_limiter.reset_all()
+    yield
+    login_limiter.reset_all()

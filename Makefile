@@ -1,9 +1,13 @@
 DEV_COMPOSE := docker compose -f deploy/compose.dev.yaml
 
-.PHONY: setup-backend db-up migrate seed-admin dev-up dev-down dev-logs dev-ps test-backend lint-backend check-backend test-frontend build-frontend check-frontend
+.PHONY: setup-backend data-dir db-up migrate seed-admin dev-up dev-down dev-logs dev-ps test-backend lint-backend check-backend test-frontend build-frontend check-frontend
 
 setup-backend:
 	cd backend && python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+
+data-dir:
+	mkdir -p data/files
+	chown -R 999:999 data/files 2>/dev/null || true
 
 db-up:
 	$(DEV_COMPOSE) up -d mysql --wait
@@ -14,7 +18,7 @@ migrate:
 seed-admin:
 	$(DEV_COMPOSE) exec api python -m app.scripts.seed_admin
 
-dev-up:
+dev-up: data-dir
 	$(DEV_COMPOSE) up -d --build
 
 dev-down:

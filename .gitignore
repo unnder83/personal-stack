@@ -10,6 +10,9 @@ __pycache__/
 .ruff_cache/
 .coverage
 
+# 运行时数据（开发环境网盘存储）
+data/
+
 # Node
 node_modules/
 dist/

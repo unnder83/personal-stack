@@ -29,6 +29,7 @@ make seed-admin                      # 首次：创建管理员（读取 deploy/
 - 前端：http://localhost:5173 （登录页 `/login`）
 - 博客首页：http://localhost:5173 （文章列表、标签过滤、文章详情 `/posts/<slug>`）
 - 管理后台：http://localhost:5173/admin/posts （需登录；文章增删改、Markdown 编辑器）
+- 网盘：http://localhost:5173/drive （需登录；开发环境文件存放在仓库 `data/files/`，已 git 忽略，`make dev-up` 会自动准备目录）
 - 后端健康检查：http://localhost:8000/api/health
 
 ## 常用命令

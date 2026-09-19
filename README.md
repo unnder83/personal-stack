@@ -14,6 +14,12 @@
 | `deploy/` | Compose 编排、Caddyfile、运维脚本 |
 | `docs/` | 设计文档与实施计划 |
 
+## 生产部署
+
+- 入口：https://stack.personal-stack.ltd （Cloudflare Tunnel，无公网端口）
+- 部署：`deploy/ops/deploy.sh`；回滚：`deploy/ops/rollback.sh <sha>`
+- 运维手册：`docs/operations.md`；上线记录：`docs/deploy-notes.md`
+
 ## 快速开始（开发）
 
 ```bash

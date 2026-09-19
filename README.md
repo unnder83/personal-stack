@@ -26,7 +26,9 @@ make seed-admin                      # 首次：创建管理员（读取 deploy/
 
 开发管理员账号来自 `deploy/.env` 的 `ADMIN_USERNAME` / `ADMIN_PASSWORD`（默认 `admin` / `dev-admin-password`，请自行修改）。
 
-- 前端：http://localhost:5173 （登录页 `/login`，管理页 `/admin`）
+- 前端：http://localhost:5173 （登录页 `/login`）
+- 博客首页：http://localhost:5173 （文章列表、标签过滤、文章详情 `/posts/<slug>`）
+- 管理后台：http://localhost:5173/admin/posts （需登录；文章增删改、Markdown 编辑器）
 - 后端健康检查：http://localhost:8000/api/health
 
 ## 常用命令

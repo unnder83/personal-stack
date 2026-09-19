@@ -1,9 +1,10 @@
 import { render, screen, waitFor } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import App from './App'
+import HomePage from './HomePage'
 
-describe('App', () => {
+describe('HomePage', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
   })
@@ -16,7 +17,11 @@ describe('App', () => {
       }),
     )
 
-    render(<App />)
+    render(
+      <MemoryRouter>
+        <HomePage />
+      </MemoryRouter>,
+    )
 
     expect(screen.getByText('后端状态：检测中...')).toBeInTheDocument()
     await waitFor(() => {

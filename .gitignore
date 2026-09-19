@@ -1,6 +1,19 @@
+# 环境与密钥
 .env
+deploy/.env
+
+# Python
 __pycache__/
-node_modules/
+*.py[cod]
 .venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+
+# Node
+node_modules/
 dist/
-*.pyc
+
+# 编辑器
+.vscode/
+.idea/

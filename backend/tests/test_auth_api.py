@@ -1,3 +1,8 @@
+from datetime import UTC, datetime, timedelta
+
+import jwt
+
+from app.core.config import settings
 from app.core.security import create_access_token, hash_password
 from app.modules.auth.models import User
 
@@ -39,6 +44,45 @@ async def test_login_sets_secure_cookie_attributes(client, db_session):
     assert "Max-Age=604800" in set_cookie
     # 测试环境 COOKIE_SECURE=false，不应带 Secure；生产默认开启
     assert "Secure" not in set_cookie
+
+
+async def test_login_sets_secure_cookie_when_enabled(client, db_session, monkeypatch):
+    await create_admin(db_session)
+    monkeypatch.setattr(settings, "cookie_secure", True)
+
+    response = await client.post(
+        "/api/auth/login", json={"username": "admin", "password": "secret123"}
+    )
+
+    assert "Secure" in response.headers["set-cookie"]
+
+
+async def test_me_with_non_numeric_sub_returns_401(client):
+    token = jwt.encode(
+        {"sub": "not-a-number", "exp": datetime.now(UTC) + timedelta(minutes=5)},
+        settings.secret_key,
+        algorithm="HS256",
+    )
+    client.cookies.set("access_token", token)
+
+    response = await client.get("/api/auth/me")
+
+    assert response.status_code == 401
+    assert response.json()["code"] == "unauthorized"
+
+
+async def test_me_with_expired_token_returns_401(client):
+    token = jwt.encode(
+        {"sub": "1", "exp": datetime.now(UTC) - timedelta(seconds=1)},
+        settings.secret_key,
+        algorithm="HS256",
+    )
+    client.cookies.set("access_token", token)
+
+    response = await client.get("/api/auth/me")
+
+    assert response.status_code == 401
+    assert response.json()["code"] == "unauthorized"
 
 
 async def test_login_wrong_password_returns_401(client, db_session):

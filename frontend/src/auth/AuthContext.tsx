@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { fetchMe, login as apiLogin, logout as apiLogout } from '../api/auth'
@@ -16,15 +16,16 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const loginStartedRef = useRef(false)
 
   useEffect(() => {
     let cancelled = false
     fetchMe()
       .then((data) => {
-        if (!cancelled) setUser(data)
+        if (!cancelled && !loginStartedRef.current) setUser(data)
       })
       .catch(() => {
-        if (!cancelled) setUser(null)
+        if (!cancelled && !loginStartedRef.current) setUser(null)
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
@@ -39,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       loading,
       login: async (username, password) => {
+        loginStartedRef.current = true
         setUser(await apiLogin(username, password))
       },
       logout: async () => {

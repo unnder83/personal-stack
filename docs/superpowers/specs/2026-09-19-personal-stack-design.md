@@ -282,6 +282,7 @@ GET    /api/storage/usage         已用空间统计
 - 密钥：`.env` 权限 600 且不入库，仓库仅保留 `.env.example`。
 - 容器：镜像内非 root 用户运行、可只读则只读根文件系统、`cap_drop: ALL`。
 - 应用：登录接口限流；Cookie 配置 `HttpOnly + Secure + SameSite`；上传做 MIME/扩展名校验；文件按哈希命名防路径穿越；Caddy/Nginx 配置安全响应头与 CSP。
+- 生产必须让限流看到真实客户端 IP：uvicorn 以 `--proxy-headers --forwarded-allow-ips=<反向代理网段>` 启动（Caddy 自动传递 `X-Forwarded-For`），否则应用层看到的都是代理容器 IP，限流会退化为全站共享配额。此配置纳入 M4 验收项。
 
 ### 11.4 HTTPS 节奏
 

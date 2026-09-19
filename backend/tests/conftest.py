@@ -33,8 +33,17 @@ def _run_alembic(*args: str, check: bool = True) -> None:
     )
 
 
+def _assert_test_database(url: str) -> None:
+    database_name = url.rsplit("/", 1)[-1].split("?", 1)[0]
+    if not database_name.endswith("_test"):
+        raise RuntimeError(
+            f"拒绝在非测试库上执行迁移：{database_name}（库名必须以 _test 结尾）"
+        )
+
+
 @pytest.fixture(scope="session", autouse=True)
 def migrated_database():
+    _assert_test_database(settings.database_url)
     # 先回退再升级：同时验证 downgrade 与 upgrade 都可用。
     # 空库（无 alembic_version 表）时 downgrade 可能报错，忽略即可。
     _run_alembic("downgrade", "base", check=False)

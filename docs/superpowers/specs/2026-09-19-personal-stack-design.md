@@ -285,6 +285,7 @@ GET    /api/storage/usage         已用空间统计
 - 密钥：`.env` 权限 600 且不入库，仓库仅保留 `.env.example`。
 - 容器：镜像内非 root 用户运行、可只读则只读根文件系统、`cap_drop: ALL`。
 - 应用：登录接口限流；Cookie 配置 `HttpOnly + Secure + SameSite`；上传做 MIME/扩展名校验；文件按哈希命名防路径穿越；Caddy/Nginx 配置安全响应头与 CSP。
+- 说明：登录限流在应用层实现（M1）；Caddy 层限流未实现，如需再加（需自定义 Caddy 构建或换 Nginx）。容器加固与 CSP/HSTS 的验收归属见里程碑 M6。
 - 生产必须让限流看到真实客户端 IP：uvicorn 以 `--proxy-headers --forwarded-allow-ips=<反向代理网段>` 启动（Caddy 自动传递 `X-Forwarded-For`），否则应用层看到的都是代理容器 IP，限流会退化为全站共享配额。此配置纳入 M4 验收项。
 
 ### 11.4 HTTPS 节奏
@@ -313,7 +314,7 @@ GET    /api/storage/usage         已用空间统计
 | M3 网盘 | 目录树、上传/下载/重命名/移动/删除、用量统计 | 浏览器上传 100MB 文件并下载，哈希一致 |
 | M4 生产部署 | Caddy + 生产编排 + 域名/HTTPS + 首次手动上线 | 外网 HTTPS 可访问 |
 | M5 CI/CD | 镜像推 GHCR、自托管 Runner、自动部署与回滚 | push 后自动上线；人工制造健康检查失败能自动回滚 |
-| M6 运维一期 | 监控大盘、每日备份 + 恢复演练、安全加固 | Grafana 有数据；从备份成功恢复一次 |
+| M6 运维一期 | 监控大盘、每日备份 + 恢复演练、安全加固 | Grafana 有数据；从备份成功恢复一次；加固清单逐项验收：SSH 仅公钥且禁 root 登录、fail2ban、容器 `cap_drop: ALL` 与可只读的根文件系统、CSP/HSTS 响应头、基础镜像按 digest 固定、宿主重启后服务自动恢复（rsync 等工具装齐） |
 
 ## 14. 风险与对策
 

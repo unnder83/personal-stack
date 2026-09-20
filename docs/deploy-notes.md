@@ -13,7 +13,7 @@
 | `GET /api/health`（HTTPS） | 200 `{"status":"ok"}` |
 | SPA 首页与深层路由（`/admin/posts`） | 200 |
 | HTTPS 登录 + `/api/auth/me` | 通过；`Set-Cookie: access_token=…; HttpOnly; Secure; SameSite=lax; Max-Age=604800` |
-| 真实客户端 IP 分桶 | 伪造 XFF `203.0.113.7` 第 6 次 429 `rate_limited`；`203.0.113.8` 独立 401 |
+| 真实客户端 IP 分桶 | 两段验证：① 应用腿（compose 内一次性容器伪造 XFF）：`203.0.113.7` 第 6 次 429 `rate_limited`，`203.0.113.8` 独立 401；② 公网路径（`bash deploy/ops/xff-check.sh`）：同一真实出口 IP 伪造两个 XFF 均落在同一桶（第二个伪造值仍 429），证明客户端无法借 XFF 绕过限流 |
 | 1MB 上传/下载 sha256 | 一致（HASH MATCH） |
 | 容器重启后数据 | 文件仍可下载，哈希一致（PERSISTED AFTER RESTART） |
 | 宿主机端口 | 除 22 外无监听；firewalld 仅 `ssh` |

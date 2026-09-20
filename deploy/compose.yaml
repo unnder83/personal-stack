@@ -62,8 +62,8 @@ services:
     read_only: true
     tmpfs:
       - /tmp
-      - /var/cache/nginx
-      - /run
+      - /var/cache/nginx:mode=1777
+      - /run:mode=1777
     networks: [appnet]
 
   caddy:

@@ -50,6 +50,8 @@ GHCR_USER=<你的GitHub用户名> GHCR_TOKEN=<有 read:packages 的 PAT> \
   bash deploy/ops/deploy-release.sh <sha>
 ```
 
+注意：GHCR 从本机拉取较慢（有新层时约 10–13 分钟），Deploy job 已设 30 分钟超时；同一版本重跑因层已缓存会快很多。
+
 ## 4. 回滚
 
 - 自动：健康检查失败时脚本自动回滚到上一 release（日志见 Actions → Deploy）。

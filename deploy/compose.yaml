@@ -29,8 +29,7 @@ services:
     networks: [appnet]
 
   api:
-    build:
-      context: ../backend
+    image: ${API_IMAGE}
     restart: unless-stopped
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips=172.28.0.0/16
     environment:
@@ -48,8 +47,7 @@ services:
     networks: [appnet]
 
   web:
-    build:
-      context: ../frontend
+    image: ${WEB_IMAGE}
     restart: unless-stopped
     networks: [appnet]
 

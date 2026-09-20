@@ -33,28 +33,38 @@ $COMPOSE exec -T caddy wget -qO- http://api:8000/api/health   # 内网健康检�
 $COMPOSE exec mysql mysql -uroot -p"$(grep ^MYSQL_ROOT_PASSWORD= /opt/personal-stack/.env | cut -d= -f2-)" personal_stack -e "SHOW TABLES;"
 ```
 
-## 3. 发布新版本
+## 3. 发布新版本（自动）
+
+push 到 `main` 后自动完成：
+
+1. `Release` 工作流（GitHub 云端）：构建 `ghcr.io/unnder83/personal-stack-{api,web}:<sha>` 并推送（同时打 `latest`）
+2. `Deploy` 工作流（VM 自托管 Runner）：经 `api.github.com` 下载该 sha 的 tarball 到 `/opt/personal-stack/releases/<sha>`，调用 `deploy/ops/deploy-release.sh <sha>`：
+   - `docker compose pull` → 迁移 → 种子管理员 → 切换 `current` → `up -d` → 健康检查
+   - 健康检查失败：自动切回上一 release 并恢复（迁移不回滚）
+
+手动触发：Actions → Deploy → Run workflow（需已有对应 sha 的 release 镜像）。
+本机手动部署（调试用）：
 
 ```bash
-cd /root/personal-stack && git pull       # 拉取最新代码（SSH 远端）
-bash deploy/ops/deploy.sh
+GHCR_USER=<你的GitHub用户名> GHCR_TOKEN=<有 read:packages 的 PAT> \
+  bash deploy/ops/deploy-release.sh <sha>
 ```
-
-脚本动作：按当前 HEAD 的 sha 建 release → 构建镜像 → `up -d` → `alembic upgrade head` → 种子管理员（幂等）→ 切换 `current`。
-同一 sha 重复执行无副作用（release 已存在则跳过解压）。
 
 ## 4. 回滚
 
+- 自动：健康检查失败时脚本自动回滚到上一 release（日志见 Actions → Deploy）。
+- 手动：找到目标 sha 后重跑脚本（该 sha 的 release 目录与 GHCR 镜像需已存在）：
+
 ```bash
-ls /opt/personal-stack/releases          # 查看可用版本
-bash deploy/ops/rollback.sh <sha>
+ls /opt/personal-stack/releases
+GHCR_USER=<用户名> GHCR_TOKEN=<PAT> bash deploy/ops/deploy-release.sh <sha>
 ```
 
-回滚只切换代码与容器，不动数据；数据库迁移如有不兼容需手工处理（当前各迁移均可来回）。
+回滚只切换代码与容器，不动数据；数据库迁移保持向前兼容（可加列不可删列），必要时手工处理。
 
 ## 5. Cloudflare Tunnel 要点
 
-- 隧道 token 在 `/opt/personal-stack/.env` 的 `CLOUDFLARE_TUNNEL_TOKEN`；轮换 token 后重跑 `deploy.sh`。
+- 隧道 token 在 `/opt/personal-stack/.env` 的 `CLOUDFLARE_TUNNEL_TOKEN`；轮换 token 后重跑一次部署（`Deploy` 工作流手动触发）。
 - 公网主机名与路由（`stack.personal-stack.ltd` → `HTTP caddy:80`）在 Cloudflare **Zero Trust → Networks → Tunnels → personal-stack → Public Hostname** 中维护。
 - 隧道故障排查：`$COMPOSE logs cloudflared | grep -E "Registered|ERR"`；`1016/1034` 类错误通常是 Public Hostname/DNS 记录缺失。
 

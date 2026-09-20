@@ -17,7 +17,7 @@
 ## 生产部署
 
 - 入口：https://stack.personal-stack.ltd （Cloudflare Tunnel，无公网端口）
-- 部署：`deploy/ops/deploy.sh`；回滚：`deploy/ops/rollback.sh <sha>`
+- 部署：push 到 `main` 自动发布（Release → Deploy），失败自动回滚；手动见 `docs/operations.md`
 - 运维手册：`docs/operations.md`；上线记录：`docs/deploy-notes.md`
 
 ## 快速开始（开发）

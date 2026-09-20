@@ -34,3 +34,9 @@
 | 回滚演练（`6050294` 临时把 `/api/health` 改成 500） | 按预期：拉镜像 → 迁移 → 切 `current` → `up -d` → 健康检查连续失败 → **自动回滚 `984d781`** → job 结论 Failed；公网恢复 200；坏镜像与坏 release 目录保留可追溯 |
 | 恢复部署（`d8fbede`，revert 演练提交） | 成功；公网 200 |
 | 部署耗时 | GHCR 拉取带宽受限：有新层时约 10–13 分钟；镜像层已在本地时 <1 分钟（已给 Deploy job 设 `timeout-minutes: 30`） |
+
+## M5 收尾（2026-09-20 UTC）
+
+- 自动部署第三次（`5a09d6f`，约 14 分钟，GHCR 层下载慢）与第四次（`325b469`，约 7 分钟）均成功。
+- 优化：`deploy/ops/host/daemon.json` 增 `"max-concurrent-downloads": 8` 并重启 docker；容器按 restart 策略自动恢复，公网无人工介入即恢复 200。
+- 结论：pull 慢的瓶颈在网络到 GHCR 的带宽，后续可评估镜像代理或构建缓存驻留方案；当前 30 分钟超时足够。

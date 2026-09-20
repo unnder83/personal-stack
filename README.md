@@ -19,6 +19,7 @@
 - 入口：https://stack.personal-stack.ltd （Cloudflare Tunnel，无公网端口）
 - 部署：push 到 `main` 自动发布（Release 构建推 GHCR → Deploy 自托管 Runner 拉取部署，健康检查失败自动回滚）
 - 手动触发：Actions → Deploy → Run workflow；详见 `docs/operations.md`
+- 监控：https://stack.personal-stack.ltd/grafana/ （basic auth + Grafana 登录，口令见服务器 `.env`）
 - 运维手册：`docs/operations.md`；上线记录：`docs/deploy-notes.md`
 
 ## 快速开始（开发）

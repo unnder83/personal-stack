@@ -86,6 +86,28 @@ GHCR_USER=<用户名> GHCR_TOKEN=<PAT> bash deploy/ops/deploy-release.sh <sha>
 | 登录总是 429 | 真实 IP 链路退化，见第 6 节；或确有攻击 |
 | 磁盘将满 | `df -h`；日志已限制 `max-size=10m,max-file=3`；备份保留策略见下一步 |
 
+## 9. 监控（M6）
+
+- 栈：Prometheus（15 天/2GB 保留）+ Grafana + node-exporter；数据在 Docker 命名卷（`personal-stack_prometheus_data`/`_grafana_data`）。
+- 入口：https://stack.personal-stack.ltd/grafana/ ，先过 Caddy basic auth（`viewer`），再登录 Grafana（`admin`）。两组口令在 `/opt/personal-stack/.env`（`GRAFANA_AUTH_HASH` 里的 `$` 必须写成 `$$`，否则 compose 插值会破坏哈希）。
+- 抓取目标：`api`（`/metrics`）、`node`（主机）、`prometheus` 自身；`/metrics` 不经公网。
+- 开关：`.env` 的 `ENABLE_MONITORING=true` 时 `deploy-release.sh` 带 `--profile monitoring`。
+- cAdvisor 因 gcr.io 不可达暂缺（容器级指标延后）；如启用，需要可用的镜像源。
+- 常用：查看目标 `docker compose -p personal-stack ... exec api python -c "..."`（见 deploy-notes）；Prometheus/Grafana 日志用 `logs prometheus|grafana`。
+
+## 10. 备份与恢复（M6）
+
+- 调度：systemd timer `personal-stack-backup.timer`，每日 03:30（`Persistent=true` 可补跑）。
+- 产物：`/srv/stack/backups/db/daily/personal_stack-YYYY-MM-DD.sql.gz`（保留 7 天）与 `weekly/`（周日副本，保留 4 周）；文件镜像在 `/srv/stack/backups/files`。权限 600（仅 root）。
+- 手动执行：`systemctl start personal-stack-backup.service` 或直接跑脚本。
+- 恢复：`bash /opt/personal-stack/current/deploy/ops/backup/restore.sh --db <dump> [--target-db personal_stack_restore]`；文件恢复用 `--files <dir> --target <dir>`；**默认恢复到 `_restore` 库**，覆盖生产库需显式指定并输入 yes。
+- 演练记录：`docs/restore-drill.md`。备份与数据同盘，不防磁盘故障；异地备份为二期。
+
+## 11. 安全加固现状（M6）
+
+- 已做：firewalld 仅 SSH；fail2ban（sshd jail，5 次/10 分钟封 1 小时）；容器 `no-new-privileges` + 上表四个服务 `cap_drop: ALL` + `read_only` + tmpfs（web 的 `/var/cache/nginx`、`/run` 设 `mode=1777`）；主站 HSTS 与 CSP（`/grafana/*` 不套 CSP）；外部镜像按 digest 固定；备份产物 600。
+- 未做/暂缓：SSH 密钥化与禁 root 登录（用户决定，继续密码登录 + fail2ban）；mysql 仅 `no-new-privileges`（官方入口需要特权）；容器级指标（cAdvisor 镜像源不可达）。
+
 ## 8. 数据备份（计划中）
 
 备份与恢复演练是 M6 范围：`mysqldump` 日备 + 文件 rsync + systemd timer + 恢复脚本。

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.core.config import settings
 from app.core.errors import register_error_handlers
@@ -13,6 +14,8 @@ app.include_router(auth_router)
 app.include_router(blog_public_router)
 app.include_router(blog_admin_router)
 app.include_router(storage_router)
+
+Instrumentator().instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)
 
 
 @app.get("/api/health")

@@ -17,4 +17,4 @@ app.include_router(storage_router)
 
 @app.get("/api/health")
 async def health() -> dict[str, str]:
-    raise RuntimeError("drill: forced unhealthy")
+    return {"status": "ok"}

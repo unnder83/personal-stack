@@ -105,18 +105,15 @@ GHCR_USER=<用户名> GHCR_TOKEN=<PAT> bash deploy/ops/deploy-release.sh <sha>
 
 ## 11. 安全加固现状（M6）
 
-- 已做：firewalld 仅 SSH；fail2ban（sshd jail，5 次/10 分钟封 1 小时）；容器 `no-new-privileges` + 上表四个服务 `cap_drop: ALL` + `read_only` + tmpfs（web 的 `/var/cache/nginx`、`/run` 设 `mode=1777`）；主站 HSTS 与 CSP（`/grafana/*` 不套 CSP）；外部镜像按 digest 固定；备份产物 600。
+- 已做：firewalld 仅 SSH；fail2ban（sshd jail，5 次/10 分钟封 1 小时；备份单元因 SELinux 对 rsync_t 的限制显式使用 `unconfined_service_t`）；容器 `no-new-privileges` + 上表四个服务 `cap_drop: ALL` + `read_only` + tmpfs（web 的 `/var/cache/nginx`、`/run` 设 `mode=1777`）；主站 HSTS 与 CSP（`/grafana/*` 不套 CSP）；外部镜像按 digest 固定；备份产物 600。
 - 未做/暂缓：SSH 密钥化与禁 root 登录（用户决定，继续密码登录 + fail2ban）；mysql 仅 `no-new-privileges`（官方入口需要特权）；容器级指标（cAdvisor 镜像源不可达）。
 
-## 8. 数据备份（计划中）
-
-备份与恢复演练是 M6 范围：`mysqldump` 日备 + 文件 rsync + systemd timer + 恢复脚本。
-在此之前，手工备份方式：
+## 12. 历史手工备份参考
 
 ```bash
-mkdir -p /srv/stack/backups
-docker compose --env-file /opt/personal-stack/.env -f /opt/personal-stack/current/deploy/compose.yaml \
+docker compose -p personal-stack --env-file /opt/personal-stack/.env --env-file /opt/personal-stack/current/deploy/.images \
   exec -T mysql mysqldump -uroot -p"$(grep ^MYSQL_ROOT_PASSWORD= /opt/personal-stack/.env | cut -d= -f2-)" \
   --single-transaction personal_stack | gzip > /srv/stack/backups/manual-$(date +%F).sql.gz
-rsync -a /srv/stack/data/files/ /srv/stack/backups/files/
 ```
+
+（日常请用第 10 节的 systemd timer；本段仅历史参考。）

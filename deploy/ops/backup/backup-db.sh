@@ -14,6 +14,8 @@ set -a
 # shellcheck disable=SC1090
 . "$ENV_FILE"
 set +a
+# 转义后的哈希在 shell 中无意义，避免后续误传给 compose
+unset GRAFANA_AUTH_HASH
 
 COMPOSE=(docker compose -p personal-stack --env-file "$ENV_FILE" \
   --env-file "$ROOT/current/deploy/.images" -f "$ROOT/current/deploy/compose.yaml")
@@ -22,8 +24,11 @@ mkdir -p "$BACKUP_DIR/daily" "$BACKUP_DIR/weekly"
 STAMP="$(date +%F)"
 TARGET="$BACKUP_DIR/daily/personal_stack-$STAMP.sql.gz"
 
+TMP_TARGET="$TARGET.tmp"
 "${COMPOSE[@]}" exec -T mysql mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" \
-  --single-transaction --routines --triggers "$MYSQL_DATABASE" | gzip > "$TARGET"
+  --single-transaction --routines --triggers "$MYSQL_DATABASE" | gzip > "$TMP_TARGET"
+gzip -t "$TMP_TARGET" || { echo "备份文件校验失败" >&2; rm -f "$TMP_TARGET"; exit 1; }
+mv "$TMP_TARGET" "$TARGET"
 echo "已备份：$TARGET ($(du -h "$TARGET" | cut -f1))"
 
 if [ "$(date +%u)" = "7" ]; then

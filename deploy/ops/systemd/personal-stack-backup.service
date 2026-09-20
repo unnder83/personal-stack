@@ -5,5 +5,8 @@ Requires=docker.service
 
 [Service]
 Type=oneshot
+# /srv/stack/data/files 的 SELinux 标签为 var_t，rsync 默认切入受限的 rsync_t 域会被拒绝读取；
+# 本单元运行仓库内脚本且以 root 执行，显式使用 unconfined_service_t 以免备份静默失败。
+SELinuxContext=system_u:system_r:unconfined_service_t:s0
 ExecStart=/bin/bash /opt/personal-stack/current/deploy/ops/backup/backup-db.sh
 ExecStart=/bin/bash /opt/personal-stack/current/deploy/ops/backup/backup-files.sh

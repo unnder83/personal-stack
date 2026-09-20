@@ -83,6 +83,12 @@ rollback() {
 # 切换后收到 TERM/INT（含 job 超时被杀）也要尽最大努力回滚
 trap 'rollback "收到中断信号，尝试回滚"' TERM INT
 
+if grep -qE '^ENABLE_MONITORING=true' "$ENV_FILE"; then
+  for key in PUBLIC_HOST GRAFANA_ADMIN_PASSWORD GRAFANA_AUTH_HASH GRAFANA_AUTH_USER; do
+    grep -qE "^${key}=.+" "$ENV_FILE" || { echo "启用监控但缺少 ${key}" >&2; exit 1; }
+  done
+fi
+
 compose_for "$RELEASE" config >/dev/null
 
 compose_for "$RELEASE" pull
@@ -96,6 +102,13 @@ fi
 
 if health_ok "$RELEASE"; then
   trap - TERM INT
+  # 清理：保留最近 5 个 release；清理悬空镜像与构建缓存
+  mapfile -t OLD_RELEASES < <(ls -1dt "$ROOT"/releases/*/ 2>/dev/null | tail -n +6)
+  for old_release in "${OLD_RELEASES[@]}"; do
+    rm -rf "$old_release"
+  done
+  docker image prune -f >/dev/null 2>&1 || true
+  docker builder prune -f --keep-storage 512MB >/dev/null 2>&1 || true
   echo "部署成功：$SHA -> $ROOT/current"
   exit 0
 fi

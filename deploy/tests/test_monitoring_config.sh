@@ -14,4 +14,13 @@ grep -q 'Strict-Transport-Security' deploy/Caddyfile && pass "有 HSTS" || fail 
 grep -q 'Content-Security-Policy' deploy/Caddyfile && pass "有 CSP" || fail "缺 CSP"
 grep -q 'ENABLE_MONITORING' deploy/ops/deploy-release.sh && pass "脚本支持监控开关" || fail "脚本缺监控开关"
 
+python3 - <<'PYEOF'
+import re
+
+text = open("deploy/Caddyfile").read()
+grafana_block = re.search(r"handle /grafana/\*\s*\{(.*?)\n\t\}", text, flags=re.S)
+assert grafana_block and "Content-Security-Policy" not in grafana_block.group(1)
+PYEOF
+[ $? -eq 0 ] && pass "grafana 路由不套 CSP" || fail "grafana 路由含 CSP"
+
 exit $FAIL

@@ -8,11 +8,17 @@ fail() { echo "FAIL: $1" >&2; FAIL=1; }
 for script in deploy/ops/backup/backup-db.sh deploy/ops/backup/backup-files.sh deploy/ops/systemd/install-backup-timer.sh; do
   bash -n "$script" && pass "$script 语法" || fail "$script 语法"
 done
+bash -n deploy/ops/backup/restore.sh && pass "restore.sh 语法" || fail "restore.sh 语法"
 grep -q 'single-transaction' deploy/ops/backup/backup-db.sh && pass "dump 使用单事务" || fail "缺 --single-transaction"
 grep -q 'mtime +7' deploy/ops/backup/backup-db.sh && pass "日备保留 7 天" || fail "缺日备保留策略"
 grep -q 'mtime +28' deploy/ops/backup/backup-db.sh && pass "周备保留 4 周" || fail "缺周备保留策略"
 grep -q 'rsync -a --delete' deploy/ops/backup/backup-files.sh && pass "文件为镜像同步" || fail "缺 rsync --delete"
 grep -q 'OnCalendar' deploy/ops/systemd/personal-stack-backup.timer && pass "timer 有调度" || fail "缺 OnCalendar"
 grep -q 'Persistent=true' deploy/ops/systemd/personal-stack-backup.timer && pass "timer 支持错过补跑" || fail "缺 Persistent"
+grep -q 'gzip -t' deploy/ops/backup/backup-db.sh && pass "备份写入后校验" || fail "缺备份校验"
+grep -q '.tmp' deploy/ops/backup/backup-db.sh && pass "备份原子写入" || fail "缺临时文件写入"
+grep -q 'unset GRAFANA_AUTH_HASH' deploy/ops/backup/backup-db.sh && pass "不导出转义哈希" || fail "sourced env 未清理哈希"
+grep -q 'SELinuxContext=system_u:system_r:unconfined_service_t' deploy/ops/systemd/personal-stack-backup.service && pass "备份单元 SELinux 域" || fail "缺 SELinuxContext"
+grep -q 'TARGET_DB' deploy/ops/backup/restore.sh && grep -q '非法库名' deploy/ops/backup/restore.sh && pass "恢复目标库名校验" || fail "缺库名校验"
 
 exit $FAIL

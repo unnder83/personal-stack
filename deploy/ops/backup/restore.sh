@@ -13,6 +13,8 @@ set -a
 # shellcheck disable=SC1090
 . "$ENV_FILE"
 set +a
+# 转义后的哈希在 shell 中无意义，避免后续误传给 compose
+unset GRAFANA_AUTH_HASH
 
 COMPOSE=(docker compose -p personal-stack --env-file "$ENV_FILE" \
   --env-file "$ROOT/current/deploy/.images" -f "$ROOT/current/deploy/compose.yaml")
@@ -37,6 +39,13 @@ case "$MODE" in
     done
     [ -n "$SRC" ] && [ -n "$TARGET" ] || usage
     [ -d "$SRC" ] || { echo "备份目录不存在：$SRC" >&2; exit 1; }
+    case "$TARGET" in
+      /srv/stack/data/*)
+        echo "警告：目标位于生产数据目录：$TARGET" >&2
+        read -r -p "输入 yes 确认覆盖：" answer
+        [ "$answer" = "yes" ] || { echo "已取消" >&2; exit 1; }
+        ;;
+    esac
     mkdir -p "$TARGET"
     rsync -a "$SRC/" "$TARGET/"
     echo "文件已恢复到 $TARGET（$(du -sh "$TARGET" | cut -f1)）"
@@ -52,6 +61,9 @@ case "$MODE" in
     done
     [ -n "$DUMP" ] || usage
     [ -f "$DUMP" ] || { echo "dump 不存在：$DUMP" >&2; exit 1; }
+    case "$TARGET_DB" in
+      *[!A-Za-z0-9_]*) echo "非法库名：$TARGET_DB" >&2; exit 1 ;;
+    esac
     if [ "$TARGET_DB" = "$MYSQL_DATABASE" ]; then
       echo "警告：即将覆盖生产库 $MYSQL_DATABASE" >&2
       read -r -p "输入 yes 确认：" answer

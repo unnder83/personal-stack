@@ -1,4 +1,5 @@
 name: personal-stack
+# 注意：本地冒烟/测试请加 `-p <独立项目名>`，否则会操作生产项目
 
 networks:
   appnet:

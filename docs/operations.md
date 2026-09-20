@@ -61,7 +61,7 @@ bash deploy/ops/rollback.sh <sha>
 ## 6. 真实客户端 IP
 
 三段配置缺一不可：cloudflared 传 `X-Forwarded-For` → Caddy `trusted_proxies static 172.28.0.0/16` → api `--proxy-headers --forwarded-allow-ips=172.28.0.0/16`。
-若登录限流误伤正常用户，先检查这三处；验证脚本见 `docs/deploy-notes.md` 的上线记录。
+若登录限流误伤正常用户，先检查这三处；公网回归：`HOST=stack.personal-stack.ltd bash deploy/ops/xff-check.sh`（见 `docs/deploy-notes.md`）。
 
 ## 7. 常见故障
 

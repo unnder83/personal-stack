@@ -9,7 +9,6 @@ ROOT="${ROOT:-/opt/personal-stack}"
 ENV_FILE="$ROOT/.env"
 RELEASE="$ROOT/releases/$SHA"
 PROJECT_NAME="personal-stack"
-STACK="${STACK:-/srv/stack}"
 
 [ -d "$RELEASE" ] || { echo "release 不存在：$RELEASE" >&2; exit 1; }
 [ -f "$ENV_FILE" ] || { echo "缺少 $ENV_FILE" >&2; exit 1; }
@@ -83,10 +82,6 @@ rollback() {
 
 # 切换后收到 TERM/INT（含 job 超时被杀）也要尽最大努力回滚
 trap 'rollback "收到中断信号，尝试回滚"' TERM INT
-
-mkdir -p "$STACK/monitoring/prometheus" "$STACK/monitoring/grafana"
-chown -R 65534:65534 "$STACK/monitoring/prometheus"
-chown -R 472:472 "$STACK/monitoring/grafana"
 
 compose_for "$RELEASE" config >/dev/null
 

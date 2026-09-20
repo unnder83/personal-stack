@@ -109,7 +109,7 @@ services:
       - --storage.tsdb.retention.size=2GB
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ${STACK_DATA:-/srv/stack}/monitoring/prometheus:/prometheus
+      - prometheus_data:/prometheus
     networks: [appnet]
 
   grafana:
@@ -124,7 +124,7 @@ services:
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
     volumes:
-      - ${STACK_DATA:-/srv/stack}/monitoring/grafana:/var/lib/grafana
+      - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
     depends_on: [prometheus]
@@ -141,3 +141,6 @@ services:
       - /:/host:ro,rslave
     networks: [appnet]
 
+volumes:
+  prometheus_data:
+  grafana_data:

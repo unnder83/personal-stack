@@ -1,0 +1,10 @@
+[Unit]
+Description=每日 03:30 执行 personal-stack 备份
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

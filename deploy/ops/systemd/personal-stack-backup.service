@@ -1,0 +1,9 @@
+[Unit]
+Description=personal-stack 每日备份（MySQL + 文件）
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/personal-stack/current/deploy/ops/backup/backup-db.sh
+ExecStart=/bin/bash /opt/personal-stack/current/deploy/ops/backup/backup-files.sh

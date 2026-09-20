@@ -56,3 +56,9 @@ jobs:
       - run: npm run lint
       - run: npm test -- --run
       - run: npm run build
+
+  deploy-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash deploy/tests/test_deploy_release.sh

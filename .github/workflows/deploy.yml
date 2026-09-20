@@ -24,7 +24,27 @@ jobs:
       SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - name: Check SHA is still main head
+        id: head
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "手动触发，跳过 main-head 检查"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          HEAD_SHA="$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/commits/main" \
+            | python3 -c 'import json,sys; print(json.load(sys.stdin)["sha"])')"
+          if [ "$HEAD_SHA" = "$SHA" ]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "跳过过期部署：$SHA 已不是 main 最新（$HEAD_SHA）"
+          fi
+
       - name: Download release tarball via API
+        if: steps.head.outputs.skip != 'true'
         run: |
           set -euo pipefail
           mkdir -p "/opt/personal-stack/releases/$SHA"
@@ -35,6 +55,7 @@ jobs:
           rm -f /tmp/release.tar.gz
 
       - name: Deploy with rollback
+        if: steps.head.outputs.skip != 'true'
         run: |
           set -euo pipefail
           cd "/opt/personal-stack/releases/$SHA"

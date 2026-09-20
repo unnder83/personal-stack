@@ -12,7 +12,7 @@ Cloudflare 边缘 ──HTTPS──► cloudflared ──http://caddy:80──�
 | 路径 | 用途 |
 |---|---|
 | `/opt/personal-stack/.env` | 生产环境变量与密钥（权限 600，不入库） |
-| `/opt/personal-stack/releases/<sha>` | 每个版本的不可变代码（`git archive` 解出） |
+| `/opt/personal-stack/releases/<sha>` | 每个版本的不可变代码（由 Deploy 工作流下载 tarball 解出） |
 | `/opt/personal-stack/current` | 指向当前版本的符号链接 |
 | `/srv/stack/data/mysql` | MySQL 数据（uid 999） |
 | `/srv/stack/data/files` | 网盘二进制（uid 999） |
@@ -24,7 +24,7 @@ Cloudflare 边缘 ──HTTPS──► cloudflared ──http://caddy:80──�
 
 ```bash
 # 进入生产 compose（路径随 current 切换）
-COMPOSE="docker compose --env-file /opt/personal-stack/.env -f /opt/personal-stack/current/deploy/compose.yaml"
+COMPOSE="docker compose -p personal-stack --env-file /opt/personal-stack/.env --env-file /opt/personal-stack/current/deploy/.images -f /opt/personal-stack/current/deploy/compose.yaml"
 
 $COMPOSE ps                          # 状态
 $COMPOSE logs -f --tail=100 api      # 应用日志
@@ -38,7 +38,7 @@ $COMPOSE exec mysql mysql -uroot -p"$(grep ^MYSQL_ROOT_PASSWORD= /opt/personal-s
 push 到 `main` 后自动完成：
 
 1. `Release` 工作流（GitHub 云端）：构建 `ghcr.io/unnder83/personal-stack-{api,web}:<sha>` 并推送（同时打 `latest`）
-2. `Deploy` 工作流（VM 自托管 Runner）：经 `api.github.com` 下载该 sha 的 tarball 到 `/opt/personal-stack/releases/<sha>`，调用 `deploy/ops/deploy-release.sh <sha>`：
+2. `Deploy` 工作流（VM 自托管 Runner）：先校验该 sha 仍是 `main` 最新（防乱序部署），再经 `api.github.com` 下载 tarball 到 `/opt/personal-stack/releases/<sha>`，调用 `deploy/ops/deploy-release.sh <sha>`：
    - `docker compose pull` → 迁移 → 种子管理员 → 切换 `current` → `up -d` → 健康检查
    - 健康检查失败：自动切回上一 release 并恢复（迁移不回滚）
 
@@ -55,7 +55,7 @@ GHCR_USER=<你的GitHub用户名> GHCR_TOKEN=<有 read:packages 的 PAT> \
 ## 4. 回滚
 
 - 自动：健康检查失败时脚本自动回滚到上一 release（日志见 Actions → Deploy）。
-- 手动：找到目标 sha 后重跑脚本（该 sha 的 release 目录与 GHCR 镜像需已存在）：
+- 手动：找到目标 sha 后重跑脚本（该 sha 的 release 目录与 GHCR 镜像需已存在；仅支持 M5 及之后的 release，旧 release 缺 `.images`）：
 
 ```bash
 ls /opt/personal-stack/releases

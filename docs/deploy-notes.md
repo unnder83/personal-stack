@@ -37,6 +37,7 @@
 
 ## M5 收尾（2026-09-20 UTC）
 
-- 自动部署第三次（`5a09d6f`，约 14 分钟，GHCR 层下载慢）与第四次（`325b469`，约 7 分钟）均成功。
-- 优化：`deploy/ops/host/daemon.json` 增 `"max-concurrent-downloads": 8` 并重启 docker；容器按 restart 策略自动恢复，公网无人工介入即恢复 200。
-- 结论：pull 慢的瓶颈在网络到 GHCR 的带宽，后续可评估镜像代理或构建缓存驻留方案；当前 30 分钟超时足够。
+- 自动部署后续：`5a09d6f` 约 14 分钟；`325b469` 约 57 秒；`eb0db0b` 约 18 分 50 秒（冷层最大观测值）。均成功，公网 200。
+- `deploy/ops/host/daemon.json` 增 `"max-concurrent-downloads": 8` 并重启 docker；容器按 restart 策略自动恢复。注意：本机为 containerd 镜像存储（docker 29.8.1），该参数对 containerd snapshotter 是否生效未经证实，"优化"效果尚无测量支撑。
+- 结论：pull 慢的瓶颈是到 GHCR 的带宽（每次带新层的版本 10–19 分钟）；30 分钟超时目前足够，后续可评估镜像代理、路径过滤（纯文档变更不触发 Release）或本地构建兜底。
+- 纯文档变更（`docs/**`、`**.md`）已在 `release.yml` 中通过 `paths-ignore` 跳过构建与部署。

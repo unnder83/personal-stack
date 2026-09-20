@@ -1,5 +1,6 @@
-name: personal-stack
-# 注意：本地冒烟/测试请加 `-p <独立项目名>`，否则会操作生产项目
+# 注意：本项目不在文件内固定 name，避免误对生产项目执行操作。
+# 生产与本地都请显式使用 -p：生产 deploy-release.sh 用 -p personal-stack；
+# 本地冒烟/测试用 `-p <独立项目名>`（例如 personal-stack-smoke）。
 
 networks:
   appnet:

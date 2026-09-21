@@ -30,7 +30,11 @@ async def test_partial_update_merges_and_persists(client, db_session):
 
     updated = await client.put(
         "/api/admin/settings/theme",
-        json={"accent": "emerald", "radius": 6, "background": {"type": "mesh", "value": "mesh-emerald"}},
+        json={
+            "accent": "emerald",
+            "radius": 6,
+            "background": {"type": "mesh", "value": "mesh-emerald"},
+        },
     )
 
     assert updated.status_code == 200

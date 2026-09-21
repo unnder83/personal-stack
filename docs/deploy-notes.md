@@ -41,3 +41,10 @@
 - `deploy/ops/host/daemon.json` 增 `"max-concurrent-downloads": 8` 并重启 docker；容器按 restart 策略自动恢复。注意：本机为 containerd 镜像存储（docker 29.8.1），该参数对 containerd snapshotter 是否生效未经证实，"优化"效果尚无测量支撑。
 - 结论：pull 慢的瓶颈是到 GHCR 的带宽（每次带新层的版本 10–19 分钟）；30 分钟超时目前足够，后续可评估镜像代理、路径过滤（纯文档变更不触发 Release）或本地构建兜底。
 - 纯文档变更（`docs/**`、`**.md`）已在 `release.yml` 中通过 `paths-ignore` 跳过构建与部署。
+
+## M7 前端主题化改版上线（2026-09-21 UTC）
+
+- Release：`b09e627`（`current` 已切换）；迁移 `0004_create_site_settings` 随部署执行
+- 验证：`GET /api/settings/theme` 返回默认主题；主站 200；Tailwind 样式包 ~72KB 正常下发；`site_settings.theme` 已播种
+- 新增：主题系统（预设/明暗/主色/圆角/模糊/背景，访客本地覆盖 + 后台站默认）、双形态首页（访客博客 / 登录控制台）、毛玻璃卡片视觉、部署教学文档、API 手册
+- 备注：Grafana 登录接口为 JSON（排障时勿用表单编码测试）；前端测试曾出现一次不可复现的偶发失败，连续 3 轮复跑全绿，观察 CI

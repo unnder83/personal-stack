@@ -1,0 +1,51 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
+
+:root {
+  --bg: #0a0a0a;
+  --surface: rgba(255, 255, 255, 0.06);
+  --fg: #ededed;
+  --fg-muted: #a1a1a1;
+  --border: rgba(255, 255, 255, 0.12);
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  --accent: #8b5cf6;
+  --accent-fg: #ffffff;
+  --radius: 16px;
+  --blur: 12px;
+  --bg-image: none;
+  --bg-overlay: rgba(0, 0, 0, 0.25);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-fg: var(--fg);
+  --color-muted: var(--fg-muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --radius-card: var(--radius);
+  --shadow-card: var(--shadow);
+  --blur-card: var(--blur);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

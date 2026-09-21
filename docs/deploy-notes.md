@@ -48,3 +48,9 @@
 - 验证：`GET /api/settings/theme` 返回默认主题；主站 200；Tailwind 样式包 ~72KB 正常下发；`site_settings.theme` 已播种
 - 新增：主题系统（预设/明暗/主色/圆角/模糊/背景，访客本地覆盖 + 后台站默认）、双形态首页（访客博客 / 登录控制台）、毛玻璃卡片视觉、部署教学文档、API 手册
 - 备注：Grafana 登录接口为 JSON（排障时勿用表单编码测试）；前端测试曾出现一次不可复现的偶发失败，连续 3 轮复跑全绿，观察 CI
+
+## 审查修复：镜像固定与资源上限（2026-09-21 UTC）
+
+- 修复三条审查意见：① 后端 `python:3.12-slim` 改为 `tag@digest` 固定；② CI 的 MySQL service 与开发编排从 `8.0` 固定到 `8.0.46`（生产原为 `8.0.46@digest`）；③ 生产编排为全部 8 个服务增加 `mem_limit`（合计约 2.0 GiB 上限，给宿主留余量），`caddy`/`cloudflared` 设 `oom_score_adj: -500` 保护公网入口，监控组件设 `+300`。
+- 新增 `deploy/tests/test_resource_limits.sh`（9 项断言）纳入 CI 的 deploy-checks。
+- 上线验证：release `ea4448d` 部署成功；`docker inspect` 确认 8 个容器内存上限与 OOM 优先级生效；公网健康检查 200。

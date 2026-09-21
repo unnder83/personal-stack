@@ -94,3 +94,26 @@ function presetToConfig(): ThemeConfig {
   const resolved = resolveTheme(preset, null, null, true)
   return resolved.config
 }
+
+describe('纯色背景的明暗与叠加', () => {
+  it('亮色纯色底自动使用亮色调色板', () => {
+    const resolved = resolveTheme(
+      preset,
+      null,
+      { background: { type: 'solid', value: '#f5f5f5' } },
+      true,
+    )
+
+    expect(resolved.effectiveMode).toBe('light')
+    expect(resolved.palette.bg).toBe(preset.light.bg)
+  })
+
+  it('纯色背景不叠加上暗层，且不设背景图', () => {
+    const vars = toCssVars(
+      resolveTheme(preset, null, { background: { type: 'solid', value: '#0b0b0f' } }, false),
+    )
+
+    expect(vars['--bg-overlay']).toBe('transparent')
+    expect(vars['--bg-image']).toBe('none')
+  })
+})

@@ -43,6 +43,7 @@ export function ThemePanel() {
       <button
         type="button"
         aria-label="主题"
+        aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
         className="rounded-card border border-border bg-surface px-4 py-2 text-sm text-fg shadow-card backdrop-blur-card"
       >
@@ -50,7 +51,7 @@ export function ThemePanel() {
       </button>
 
       {open && (
-        <div className="mt-3 w-72 rounded-card border border-border bg-surface p-4 text-sm text-fg shadow-card backdrop-blur-card">
+        <div className="mt-3 max-h-[70vh] w-72 overflow-y-auto rounded-card border border-border bg-surface p-4 text-sm text-fg shadow-card backdrop-blur-card">
           <p className="mb-2 text-muted">主题预设</p>
           <div className="mb-4 flex flex-wrap gap-2">
             {PRESETS.map((preset) => (

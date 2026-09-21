@@ -66,8 +66,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const query = window.matchMedia?.('(prefers-color-scheme: dark)')
     if (!query) return
     const listener = (event: MediaQueryListEvent) => setPrefersDark(event.matches)
-    query.addEventListener('change', listener)
-    return () => query.removeEventListener('change', listener)
+    if (typeof query.addEventListener === 'function') {
+      query.addEventListener('change', listener)
+      return () => query.removeEventListener('change', listener)
+    }
+    query.addListener(listener)
+    return () => query.removeListener(listener)
   }, [])
 
   const resolved = useMemo(
@@ -82,7 +86,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const setOverride = useCallback((patch: ThemePatch) => {
     setOverrideState((current) => {
       const next = { ...(current ?? {}), ...patch }
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+      } catch {
+        // 隐私模式等场景写失败时忽略，仅本次生效
+      }
       return next
     })
   }, [])

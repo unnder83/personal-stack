@@ -112,6 +112,6 @@ describe('BlogListPage', () => {
     )
 
     const link = await screen.findByRole('link', { name: 'C++' })
-    expect(link).toHaveAttribute('href', '/?tag=c%2B%2B')
+    expect(link).toHaveAttribute('href', '/blog?tag=c%2B%2B')
   })
 })

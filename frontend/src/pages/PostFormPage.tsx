@@ -110,7 +110,7 @@ export default function PostFormPage() {
           {postId === null ? '新建文章' : '编辑文章'}
         </h1>
         {error !== '' && (
-          <p role="alert" className="mb-4 text-sm text-accent">
+          <p role="alert" className="mb-4 text-sm text-accent-text">
             {error}
           </p>
         )}

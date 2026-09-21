@@ -106,6 +106,6 @@ describe('PostDetailPage', () => {
     renderDetail()
 
     const link = await screen.findByRole('link', { name: 'C#' })
-    expect(link).toHaveAttribute('href', '/?tag=c%23')
+    expect(link).toHaveAttribute('href', '/blog?tag=c%23')
   })
 })

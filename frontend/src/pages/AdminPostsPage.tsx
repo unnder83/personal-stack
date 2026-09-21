@@ -63,8 +63,11 @@ export default function AdminPostsPage() {
       <section className="space-y-6">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-semibold tracking-tight">文章管理</h1>
-          <Link to="/admin/posts/new">
-            <Button variant="primary">新建文章</Button>
+          <Link
+            to="/admin/posts/new"
+            className="rounded-card bg-accent px-3 py-2 text-sm text-accent-fg transition-colors hover:opacity-90"
+          >
+            新建文章
           </Link>
         </header>
 
@@ -85,7 +88,7 @@ export default function AdminPostsPage() {
 
         {loading && <p className="text-muted">加载中...</p>}
         {error !== '' && (
-          <p role="alert" className="text-accent">
+          <p role="alert" className="text-accent-text">
             {error}
           </p>
         )}
@@ -115,7 +118,7 @@ export default function AdminPostsPage() {
                     <div className="flex gap-3">
                       <Link
                         to={`/admin/posts/${post.id}/edit`}
-                        className="text-accent hover:opacity-80"
+                        className="text-accent-text hover:opacity-80"
                       >
                         编辑
                       </Link>

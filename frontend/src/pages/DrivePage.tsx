@@ -194,7 +194,7 @@ export default function DrivePage() {
 
         {loading && <p className="text-muted">加载中...</p>}
         {error !== '' && (
-          <p role="alert" className="text-accent">
+          <p role="alert" className="text-accent-text">
             {error}
           </p>
         )}
@@ -218,7 +218,7 @@ export default function DrivePage() {
                   <td className="px-4 py-3">
                     <button
                       onClick={() => openFolder(folder.id)}
-                      className="hover:text-accent"
+                      className="hover:text-accent-text"
                     >
                       {folder.name}
                     </button>
@@ -240,7 +240,7 @@ export default function DrivePage() {
               {contents?.files.map((file) => (
                 <tr key={`file-${file.id}`} className="border-b border-border last:border-0">
                   <td className="px-4 py-3">
-                    <a href={downloadUrl(file.id)} className="text-accent hover:opacity-80">
+                    <a href={downloadUrl(file.id)} className="text-accent-text hover:opacity-80">
                       {file.name}
                     </a>
                   </td>

@@ -77,7 +77,7 @@ sudo fail2ban-client status sshd
 
 ### 2.3 数据目录与 swap
 
-生产数据放 `/srv/stack`。低于 4G 内存的机器建议加 swap（本项目 2.6G 内存 + 4G swap）：
+生产数据放 `/srv/stack`。低于 4G 内存的机器建议加 swap（本项目 2.6G 内存，系统盘自带 2G swap + 这里再加 2G，共 4G）：
 
 ```bash
 sudo mkdir -p /srv/stack/data/mysql /srv/stack/data/files /srv/stack/caddy/data /srv/stack/caddy/config
@@ -157,7 +157,21 @@ sudo bash -c 'grep -vE "PASSWORD|SECRET|TOKEN" /opt/personal-stack/.env'
 
 ```bash
 cd /root/personal-stack
-sudo bash deploy/ops/deploy-release.sh <当前commit的短sha>
+SHA=$(git rev-parse --short HEAD)
+
+# 1) 准备 release 目录（脚本要求 /opt/personal-stack/releases/<sha> 已存在）
+sudo mkdir -p "/opt/personal-stack/releases/$SHA"
+git archive HEAD | sudo tar -x -C "/opt/personal-stack/releases/$SHA"
+
+# 2) 部署
+sudo bash deploy/ops/deploy-release.sh "$SHA"
+```
+
+⚠️ 坑：`deploy-release.sh` 默认从 `ghcr.io/unnder83/...` 拉镜像（本项目作者的命名空间）。
+如果你 fork 了仓库，请用 `GHCR_OWNER=<你的GitHub用户名>` 覆盖，例如：
+
+```bash
+sudo GHCR_OWNER=<你的用户名> bash deploy/ops/deploy-release.sh "$SHA"
 ```
 
 脚本会：写 `.images`（记录本次镜像标签）→ 拉镜像 → 执行迁移 → 建管理员（幂等）→ 切换 `current` → `up -d` → 健康检查（失败自动回滚）。

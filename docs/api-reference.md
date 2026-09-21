@@ -16,6 +16,7 @@
 
 | 状态码 | code 示例 | 说明 |
 |---|---|---|
+| 400 | `invalid_path` | 非法存储路径（防御性） |
 | 401 | `unauthorized` / `invalid_credentials` | 未登录 / 凭据错误 |
 | 404 | `not_found` | 资源不存在 |
 | 409 | `name_conflict` / `slug_conflict` / `folder_not_empty` / `invalid_move` | 冲突 |

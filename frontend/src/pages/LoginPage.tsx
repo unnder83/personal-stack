@@ -48,7 +48,7 @@ export default function LoginPage() {
             />
           </label>
           {error !== '' && (
-            <p role="alert" className="text-sm text-accent">
+            <p role="alert" className="text-sm text-accent-text">
               {error}
             </p>
           )}

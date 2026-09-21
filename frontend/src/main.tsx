@@ -1,4 +1,4 @@
-import 'highlight.js/styles/github.css'
+import 'highlight.js/styles/base16/github.css'
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'

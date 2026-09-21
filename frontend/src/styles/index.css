@@ -4,18 +4,70 @@
 @custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
 
 :root {
+  color-scheme: dark;
   --bg: #0a0a0a;
   --surface: rgba(255, 255, 255, 0.06);
   --fg: #ededed;
   --fg-muted: #a1a1a1;
   --border: rgba(255, 255, 255, 0.12);
   --shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
-  --accent: #8b5cf6;
+  --accent: #7c3aed;
   --accent-fg: #ffffff;
+  --accent-text: #c4b5fd;
   --radius: 16px;
   --blur: 12px;
   --bg-image: none;
-  --bg-overlay: rgba(0, 0, 0, 0.25);
+  --bg-overlay: transparent;
+
+  /* highlight.js base16 主题变量（暗色） */
+  --base00: #0d1117;
+  --base01: #161b22;
+  --base02: #30363d;
+  --base03: #8b949e;
+  --base04: #c9d1d9;
+  --base05: #e6edf3;
+  --base06: #e6edf3;
+  --base07: #ffffff;
+  --base08: #ff7b72;
+  --base09: #ffa657;
+  --base0A: #d29922;
+  --base0B: #7ee787;
+  --base0C: #a5d6ff;
+  --base0D: #79c0ff;
+  --base0E: #d2a8ff;
+  --base0F: #8b949e;
+}
+
+/* 默认预设（vercel-dark）的亮色兜底：避免亮色访客在 JS 挂载前闪暗色 */
+:root[data-mode="light"] {
+  color-scheme: light;
+  --bg: #fafafa;
+  --surface: rgba(255, 255, 255, 0.72);
+  --fg: #111111;
+  --fg-muted: #666666;
+  --border: rgba(0, 0, 0, 0.08);
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  --accent: #7c3aed;
+  --accent-fg: #ffffff;
+  --accent-text: #6d28d9;
+  --bg-overlay: rgba(255, 255, 255, 0.45);
+
+  --base00: #f6f8fa;
+  --base01: #eaeef2;
+  --base02: #d0d7de;
+  --base03: #8b949e;
+  --base04: #57606a;
+  --base05: #24292f;
+  --base06: #24292f;
+  --base07: #24292f;
+  --base08: #cf222e;
+  --base09: #953800;
+  --base0A: #9a6700;
+  --base0B: #116329;
+  --base0C: #0a3069;
+  --base0D: #0969da;
+  --base0E: #8250df;
+  --base0F: #6e7781;
 }
 
 @theme inline {
@@ -26,6 +78,7 @@
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-fg: var(--accent-fg);
+  --color-accent-text: var(--accent-text);
   --radius-card: var(--radius);
   --shadow-card: var(--shadow);
   --blur-card: var(--blur);

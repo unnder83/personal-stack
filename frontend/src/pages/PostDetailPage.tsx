@@ -44,7 +44,7 @@ export default function PostDetailPage() {
   if (error !== '' || post === null) {
     return (
       <AppShell>
-        <p role="alert" className="text-accent">
+        <p role="alert" className="text-accent-text">
           {error || '文章不存在'}
         </p>
       </AppShell>
@@ -66,8 +66,8 @@ export default function PostDetailPage() {
             {post.tags.map((tag) => (
               <Link
                 key={tag.slug}
-                to={`/?tag=${encodeURIComponent(tag.slug)}`}
-                className="text-accent hover:opacity-80"
+                to={`/blog?tag=${encodeURIComponent(tag.slug)}`}
+                className="text-accent-text hover:opacity-80"
               >
                 {tag.name}
               </Link>

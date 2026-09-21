@@ -5,7 +5,7 @@ FAIL=0
 pass() { echo "PASS: $1"; }
 fail() { echo "FAIL: $1" >&2; FAIL=1; }
 
-python3 - <<'PYEOF'
+if python3 - <<'PYEOF'
 import pathlib
 import re
 import sys
@@ -19,7 +19,11 @@ if missing:
     sys.exit(1)
 print(f"接口前缀覆盖 {len(prefixes)} 个")
 PYEOF
-[ $? -eq 0 ] && pass "API 手册覆盖全部路由前缀" || fail "API 手册缺路由前缀"
+then
+  pass "API 手册覆盖全部路由前缀"
+else
+  fail "API 手册缺路由前缀"
+fi
 
 grep -q "错误响应" docs/api-reference.md && pass "手册含错误响应约定" || fail "缺错误响应约定"
 grep -q "curl 示例集" docs/api-reference.md && pass "手册含 curl 示例" || fail "缺 curl 示例"

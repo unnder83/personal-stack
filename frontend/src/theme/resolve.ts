@@ -84,6 +84,22 @@ export function effectiveMode(mode: ThemeMode, prefersDark: boolean): EffectiveM
   return mode
 }
 
+function expandHex(hex: string): string {
+  if (hex.length === 4) {
+    return `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`
+  }
+  return hex
+}
+
+export function relativeLuminance(hex: string): number {
+  const value = expandHex(hex).slice(1)
+  const channels = [0, 2, 4].map((index) => {
+    const channel = parseInt(value.slice(index, index + 2), 16) / 255
+    return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
+  })
+  return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]
+}
+
 export function resolveTheme(
   preset: Preset,
   siteDefault: ThemePatch | null,
@@ -99,7 +115,11 @@ export function resolveTheme(
   }
   const withSite = siteDefault ? mergeTheme(presetConfig, siteDefault) : presetConfig
   const config = visitor ? mergeTheme(withSite, visitor) : withSite
-  const mode = effectiveMode(config.mode, prefersDark)
+  let mode = effectiveMode(config.mode, prefersDark)
+  if (config.background.type === 'solid') {
+    // 纯色背景按亮度决定明暗，避免亮色底配暗色文字
+    mode = relativeLuminance(config.background.value) > 0.4 ? 'light' : 'dark'
+  }
   return {
     config,
     effectiveMode: mode,
@@ -122,9 +142,13 @@ export function toCssVars(theme: ResolvedTheme): Record<string, string> {
     '--shadow': palette.shadow,
     '--accent': ACCENT_COLORS[config.accent].accent,
     '--accent-fg': ACCENT_COLORS[config.accent].fg,
+    '--accent-text':
+      mode === 'light'
+        ? ACCENT_COLORS[config.accent].textLight
+        : ACCENT_COLORS[config.accent].textDark,
     '--radius': `${config.radius}px`,
     '--blur': `${config.blur}px`,
     '--bg-image': backgroundCss,
-    '--bg-overlay': BACKGROUND_OVERLAY[mode],
+    '--bg-overlay': config.background.type === 'solid' ? 'transparent' : BACKGROUND_OVERLAY[mode],
   }
 }

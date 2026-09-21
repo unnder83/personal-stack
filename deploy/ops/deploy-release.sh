@@ -9,6 +9,7 @@ ROOT="${ROOT:-/opt/personal-stack}"
 ENV_FILE="$ROOT/.env"
 RELEASE="$ROOT/releases/$SHA"
 PROJECT_NAME="personal-stack"
+GHCR_OWNER="${GHCR_OWNER:-unnder83}"
 
 [ -d "$RELEASE" ] || { echo "release 不存在：$RELEASE" >&2; exit 1; }
 [ -f "$ENV_FILE" ] || { echo "缺少 $ENV_FILE" >&2; exit 1; }
@@ -17,8 +18,8 @@ PROJECT_NAME="personal-stack"
   exit 1
 }
 
-API_IMAGE="ghcr.io/unnder83/personal-stack-api:$SHA"
-WEB_IMAGE="ghcr.io/unnder83/personal-stack-web:$SHA"
+API_IMAGE="ghcr.io/${GHCR_OWNER}/personal-stack-api:$SHA"
+WEB_IMAGE="ghcr.io/${GHCR_OWNER}/personal-stack-web:$SHA"
 printf 'API_IMAGE=%s\nWEB_IMAGE=%s\n' "$API_IMAGE" "$WEB_IMAGE" > "$RELEASE/deploy/.images"
 
 if [ -n "${GHCR_TOKEN:-}" ]; then

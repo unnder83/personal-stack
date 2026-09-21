@@ -140,13 +140,16 @@ export function getPreset(id: string): Preset {
   return PRESETS.find((preset) => preset.id === id) ?? PRESETS[0]
 }
 
-export const ACCENT_COLORS: Record<Accent, { accent: string; fg: string }> = {
-  violet: { accent: '#8b5cf6', fg: '#ffffff' },
-  blue: { accent: '#3b82f6', fg: '#ffffff' },
-  emerald: { accent: '#10b981', fg: '#06281d' },
-  rose: { accent: '#f43f5e', fg: '#ffffff' },
-  amber: { accent: '#f59e0b', fg: '#2a1a02' },
-  slate: { accent: '#64748b', fg: '#ffffff' },
+export const ACCENT_COLORS: Record<
+  Accent,
+  { accent: string; fg: string; textLight: string; textDark: string }
+> = {
+  violet: { accent: '#7c3aed', fg: '#ffffff', textLight: '#6d28d9', textDark: '#c4b5fd' },
+  blue: { accent: '#2563eb', fg: '#ffffff', textLight: '#1d4ed8', textDark: '#93c5fd' },
+  emerald: { accent: '#047857', fg: '#ffffff', textLight: '#047857', textDark: '#6ee7b7' },
+  rose: { accent: '#e11d48', fg: '#ffffff', textLight: '#be123c', textDark: '#fda4af' },
+  amber: { accent: '#f59e0b', fg: '#2a1a02', textLight: '#b45309', textDark: '#fcd34d' },
+  slate: { accent: '#475569', fg: '#ffffff', textLight: '#475569', textDark: '#cbd5e1' },
 }
 
 export const BACKGROUND_CSS: Record<string, string> = {

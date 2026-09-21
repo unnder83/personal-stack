@@ -78,7 +78,7 @@ export default function BlogListPage() {
 
         {loading && <p className="text-muted">加载中...</p>}
         {error !== '' && (
-          <p role="alert" className="text-accent">
+          <p role="alert" className="text-accent-text">
             {error}
           </p>
         )}
@@ -88,7 +88,7 @@ export default function BlogListPage() {
           {posts.map((post) => (
             <Surface key={post.id} className="p-6">
               <h2 className="text-lg font-semibold">
-                <Link to={`/posts/${post.slug}`} className="hover:text-accent">
+                <Link to={`/posts/${post.slug}`} className="hover:text-accent-text">
                   {post.title}
                 </Link>
               </h2>
@@ -102,8 +102,8 @@ export default function BlogListPage() {
                 {post.tags.map((item) => (
                   <Link
                     key={item.slug}
-                    to={`/?tag=${encodeURIComponent(item.slug)}`}
-                    className="text-accent hover:opacity-80"
+                    to={`/blog?tag=${encodeURIComponent(item.slug)}`}
+                    className="text-accent-text hover:opacity-80"
                   >
                     {item.name}
                   </Link>

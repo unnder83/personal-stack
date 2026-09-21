@@ -6,6 +6,7 @@ import { BackgroundLayer } from './components/ui/BackgroundLayer'
 import AdminPostsPage from './pages/AdminPostsPage'
 import BlogListPage from './pages/BlogListPage'
 import DrivePage from './pages/DrivePage'
+import HomeGate from './pages/HomeGate'
 import LoginPage from './pages/LoginPage'
 import PostDetailPage from './pages/PostDetailPage'
 import PostFormPage from './pages/PostFormPage'
@@ -19,7 +20,7 @@ export default function App() {
         <AuthProvider>
           <BackgroundLayer />
           <Routes>
-            <Route path="/" element={<BlogListPage />} />
+            <Route path="/" element={<HomeGate />} />
             <Route path="/blog" element={<BlogListPage />} />
             <Route path="/posts/:slug" element={<PostDetailPage />} />
             <Route

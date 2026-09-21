@@ -11,6 +11,7 @@ from app.db.base import Base
 from app.modules.auth import models  # noqa: F401  注册模型元数据
 from app.modules.blog import models as blog_models  # noqa: F401  注册模型元数据
 from app.modules.storage import models as storage_models  # noqa: F401  注册模型元数据
+from app.modules.settings import models as settings_models  # noqa: F401  注册模型元数据
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url)

@@ -375,7 +375,8 @@ bash deploy/ops/backup/restore.sh --files /srv/stack/backups/files --target /tmp
 | 登录限流 | 应用层按真实 IP 5 次/分钟 |
 | 容器 | 4 个服务 `cap_drop: ALL` + `read_only` + `no-new-privileges`；mysql 仅 `no-new-privileges`（官方入口需特权） |
 | 响应头 | HSTS + CSP（Grafana 路由不套 CSP） |
-| 镜像 | 外部镜像按 `tag@digest` 固定；自建镜像按 sha 标签 |
+| 镜像 | 外部镜像按 `tag@digest` 固定（含后端 `python:3.12-slim`）；自建镜像按 sha 标签 |
+| 资源限制 | 每个生产容器 `mem_limit`；`caddy`/`cloudflared` `oom_score_adj: -500` 保护隧道与反代，监控组件 `+300` |
 | 备份 | 产物权限 600；同盘备份仅防误删，异地备份为二期 |
 | 监控入口 | Grafana 双层认证（Caddy basic auth + Grafana 登录） |
 

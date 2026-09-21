@@ -12,6 +12,7 @@ services:
   mysql:
     image: mysql:8.0.46@sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b
     restart: unless-stopped
+    mem_limit: 640m
     security_opt: [no-new-privileges:true]
     command:
       - --character-set-server=utf8mb4
@@ -34,6 +35,7 @@ services:
   api:
     image: ${API_IMAGE}
     restart: unless-stopped
+    mem_limit: 448m
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
     read_only: true
@@ -57,6 +59,7 @@ services:
   web:
     image: ${WEB_IMAGE}
     restart: unless-stopped
+    mem_limit: 64m
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
     read_only: true
@@ -69,6 +72,8 @@ services:
   caddy:
     image: caddy:2.11.4-alpine@sha256:de23def33b17fb5d1290b0f6c2add1d70780e52341896c00a4c8a2a2fe9d355e
     restart: unless-stopped
+    mem_limit: 96m
+    oom_score_adj: -500
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
     cap_add: [NET_BIND_SERVICE]
@@ -88,6 +93,8 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:2026.9.1@sha256:b269e8abd07a5bf6f3f4be65d5050b2174eca89c56a0241a8ff32a16aec454e4
     restart: unless-stopped
+    mem_limit: 96m
+    oom_score_adj: -500
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
     read_only: true
@@ -101,6 +108,8 @@ services:
   prometheus:
     image: prom/prometheus:v3.1.0@sha256:6559acbd5d770b15bb3c954629ce190ac3cbbdb2b7f1c30f0385c4e05104e218
     restart: unless-stopped
+    mem_limit: 320m
+    oom_score_adj: 300
     profiles: ["monitoring"]
     command:
       - --config.file=/etc/prometheus/prometheus.yml
@@ -115,6 +124,8 @@ services:
   grafana:
     image: grafana/grafana:11.4.0@sha256:d8ea37798ccc41061a62ab080f2676dda6bf7815558499f901bdb0f533a456fb
     restart: unless-stopped
+    mem_limit: 320m
+    oom_score_adj: 300
     profiles: ["monitoring"]
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
@@ -133,6 +144,8 @@ services:
   node-exporter:
     image: prom/node-exporter:v1.8.2@sha256:4032c6d5bfd752342c3e631c2f1de93ba6b86c41db6b167b9a35372c139e7706
     restart: unless-stopped
+    mem_limit: 48m
+    oom_score_adj: 300
     profiles: ["monitoring"]
     command:
       - --path.rootfs=/host

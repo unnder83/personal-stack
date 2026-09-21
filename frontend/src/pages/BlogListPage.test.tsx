@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { AuthProvider } from '../auth/AuthContext'
 import BlogListPage from './BlogListPage'
 
 function mockFetch(routes: Record<string, unknown>) {
@@ -9,6 +10,9 @@ function mockFetch(routes: Record<string, unknown>) {
     'fetch',
     vi.fn((input: RequestInfo | URL) => {
       const url = String(input)
+      if (url === '/api/auth/me') {
+        return Promise.resolve(new Response('', { status: 401 }))
+      }
       for (const [prefix, body] of Object.entries(routes)) {
         if (url.startsWith(prefix)) {
           return Promise.resolve(
@@ -51,7 +55,9 @@ describe('BlogListPage', () => {
 
     render(
       <MemoryRouter>
-        <BlogListPage />
+        <AuthProvider>
+          <BlogListPage />
+        </AuthProvider>
       </MemoryRouter>,
     )
 
@@ -68,7 +74,9 @@ describe('BlogListPage', () => {
 
     render(
       <MemoryRouter>
-        <BlogListPage />
+        <AuthProvider>
+          <BlogListPage />
+        </AuthProvider>
       </MemoryRouter>,
     )
 
@@ -97,7 +105,9 @@ describe('BlogListPage', () => {
 
     render(
       <MemoryRouter>
-        <BlogListPage />
+        <AuthProvider>
+          <BlogListPage />
+        </AuthProvider>
       </MemoryRouter>,
     )
 

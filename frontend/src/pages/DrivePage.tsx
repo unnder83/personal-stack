@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
 import type { ChangeEvent } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 
 import type { FolderContents, FolderTreeNode, StorageUsage } from '../api/storage'
+import { AppShell } from '../components/ui/AppShell'
+import { Button } from '../components/ui/Button'
+import { Surface } from '../components/ui/Surface'
 import {
   createFolder,
   deleteFile,
@@ -161,80 +164,104 @@ export default function DrivePage() {
   }
 
   return (
-    <main>
-      <header>
-        <h1>我的网盘</h1>
-        <Link to="/">返回博客</Link>
-      </header>
+    <AppShell>
+      <section className="space-y-6">
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-semibold tracking-tight">我的网盘</h1>
+          <p className="text-sm text-muted">
+            已用 {formatSize(usage.used_bytes)} / {usage.file_count} 个文件
+          </p>
+        </header>
 
-      <p>
-        已用 {formatSize(usage.used_bytes)} / {usage.file_count} 个文件
-      </p>
-
-      <nav aria-label="面包屑">
-        <button onClick={() => openFolder(null)}>根目录</button>
-        {contents?.breadcrumb.map((item) => (
-          <button key={item.id} onClick={() => openFolder(item.id)}>
-            {item.name}
-          </button>
-        ))}
-      </nav>
-
-      <p>
-        <button onClick={handleCreateFolder}>新建文件夹</button>
-        <label>
-          上传文件
-          <input type="file" aria-label="上传文件" onChange={handleUpload} />
-        </label>
-      </p>
-
-      {loading && <p>加载中...</p>}
-      {error !== '' && <p role="alert">{error}</p>}
-      {!loading && contents && contents.folders.length === 0 && contents.files.length === 0 && (
-        <p>空目录</p>
-      )}
-
-      <table>
-        <thead>
-          <tr>
-            <th>名称</th>
-            <th>大小</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          {contents?.folders.map((folder) => (
-            <tr key={`folder-${folder.id}`}>
-              <td>
-                <button onClick={() => openFolder(folder.id)}>{folder.name}</button>
-              </td>
-              <td>—</td>
-              <td>
-                <button onClick={() => handleRenameFolder(folder.id, folder.name)}>重命名</button>
-                <button onClick={() => handleMoveFolder(folder.id)}>移动</button>
-                <button onClick={() => handleDeleteFolder(folder.id, folder.name)}>
-                  删除文件夹 {folder.name}
-                </button>
-              </td>
-            </tr>
+        <nav aria-label="面包屑" className="flex flex-wrap gap-2">
+          <Button onClick={() => openFolder(null)}>根目录</Button>
+          {contents?.breadcrumb.map((item) => (
+            <Button key={item.id} onClick={() => openFolder(item.id)}>
+              {item.name}
+            </Button>
           ))}
-          {contents?.files.map((file) => (
-            <tr key={`file-${file.id}`}>
-              <td>
-                <a href={downloadUrl(file.id)}>{file.name}</a>
-              </td>
-              <td>{formatSize(file.size)}</td>
-              <td>
-                <button onClick={() => handleRenameFile(file.id, file.name)}>重命名</button>
-                <button onClick={() => handleMoveFile(file.id)}>移动</button>
-                <button onClick={() => handleDeleteFile(file.id, file.name)}>
-                  删除 {file.name}
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </main>
+        </nav>
+
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <Button variant="primary" onClick={handleCreateFolder}>
+            新建文件夹
+          </Button>
+          <label className="flex items-center gap-2 text-muted">
+            上传文件
+            <input type="file" aria-label="上传文件" onChange={handleUpload} />
+          </label>
+        </div>
+
+        {loading && <p className="text-muted">加载中...</p>}
+        {error !== '' && (
+          <p role="alert" className="text-accent">
+            {error}
+          </p>
+        )}
+        {!loading &&
+          contents &&
+          contents.folders.length === 0 &&
+          contents.files.length === 0 && <p className="text-muted">空目录</p>}
+
+        <Surface className="overflow-hidden">
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-border text-muted">
+              <tr>
+                <th className="px-4 py-3 font-medium">名称</th>
+                <th className="px-4 py-3 font-medium">大小</th>
+                <th className="px-4 py-3 font-medium">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {contents?.folders.map((folder) => (
+                <tr key={`folder-${folder.id}`} className="border-b border-border last:border-0">
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => openFolder(folder.id)}
+                      className="hover:text-accent"
+                    >
+                      {folder.name}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3 text-muted">—</td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-2">
+                      <Button onClick={() => handleRenameFolder(folder.id, folder.name)}>
+                        重命名
+                      </Button>
+                      <Button onClick={() => handleMoveFolder(folder.id)}>移动</Button>
+                      <Button onClick={() => handleDeleteFolder(folder.id, folder.name)}>
+                        删除文件夹 {folder.name}
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {contents?.files.map((file) => (
+                <tr key={`file-${file.id}`} className="border-b border-border last:border-0">
+                  <td className="px-4 py-3">
+                    <a href={downloadUrl(file.id)} className="text-accent hover:opacity-80">
+                      {file.name}
+                    </a>
+                  </td>
+                  <td className="px-4 py-3 text-muted">{formatSize(file.size)}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-2">
+                      <Button onClick={() => handleRenameFile(file.id, file.name)}>
+                        重命名
+                      </Button>
+                      <Button onClick={() => handleMoveFile(file.id)}>移动</Button>
+                      <Button onClick={() => handleDeleteFile(file.id, file.name)}>
+                        删除 {file.name}
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Surface>
+      </section>
+    </AppShell>
   )
 }

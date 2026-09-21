@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { listAdminPosts } from '../api/blog'
 import { fetchUsage } from '../api/storage'
 import { useAuth } from '../auth/AuthContext'
+import { AppShell } from '../components/ui/AppShell'
 import { Surface } from '../components/ui/Surface'
 
 function formatSize(bytes: number): string {
@@ -39,7 +40,8 @@ export default function ConsolePage() {
   }, [])
 
   return (
-    <section className="space-y-8">
+    <AppShell>
+      <section className="space-y-8">
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">你好，{user?.username}</h1>
         <p className="mt-1 text-sm text-muted">欢迎回到 personal-stack</p>
@@ -76,6 +78,7 @@ export default function ConsolePage() {
           </Surface>
         </Link>
       </div>
-    </section>
+      </section>
+    </AppShell>
   )
 }

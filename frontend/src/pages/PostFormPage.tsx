@@ -4,8 +4,10 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { createPost, getAdminPost, updatePost } from '../api/blog'
 import type { PostInputPayload } from '../api/blog'
-import { AdminHeader } from '../components/AdminHeader'
 import { MarkdownEditor } from '../components/MarkdownEditor'
+import { AppShell } from '../components/ui/AppShell'
+import { Button } from '../components/ui/Button'
+import { Surface } from '../components/ui/Surface'
 
 type FormState = {
   title: string
@@ -90,46 +92,81 @@ export default function PostFormPage() {
     }
   }
 
-  if (loading) return <p>加载中...</p>
+  if (loading) {
+    return (
+      <AppShell>
+        <p className="text-muted">加载中...</p>
+      </AppShell>
+    )
+  }
+
+  const inputClass =
+    'mt-1 w-full rounded-card border border-border bg-bg/40 px-3 py-2 text-fg outline-none focus:border-accent'
 
   return (
-    <main>
-      <AdminHeader />
-      <h1>{postId === null ? '新建文章' : '编辑文章'}</h1>
-      {error !== '' && <p role="alert">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <label>
-          标题
-          <input value={form.title} onChange={(e) => update('title', e.target.value)} />
-        </label>
-        <label>
-          slug（留空自动生成）
-          <input value={form.slug} onChange={(e) => update('slug', e.target.value)} />
-        </label>
-        <label>
-          摘要
-          <input value={form.summary} onChange={(e) => update('summary', e.target.value)} />
-        </label>
-        <label>
-          标签（逗号分隔）
-          <input value={form.tags} onChange={(e) => update('tags', e.target.value)} />
-        </label>
-        <label>
-          状态
-          <select
-            value={form.status}
-            onChange={(e) => update('status', e.target.value as FormState['status'])}
-          >
-            <option value="draft">草稿</option>
-            <option value="published">发布</option>
-          </select>
-        </label>
-        <MarkdownEditor
-          value={form.content_md}
-          onChange={(value) => update('content_md', value)}
-        />
-        <button type="submit">保存</button>
-      </form>
-    </main>
+    <AppShell>
+      <Surface className="mx-auto max-w-3xl p-6">
+        <h1 className="mb-4 text-xl font-semibold">
+          {postId === null ? '新建文章' : '编辑文章'}
+        </h1>
+        {error !== '' && (
+          <p role="alert" className="mb-4 text-sm text-accent">
+            {error}
+          </p>
+        )}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <label className="block text-sm">
+            <span className="text-muted">标题</span>
+            <input
+              value={form.title}
+              onChange={(e) => update('title', e.target.value)}
+              className={inputClass}
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="text-muted">slug（留空自动生成）</span>
+            <input
+              value={form.slug}
+              onChange={(e) => update('slug', e.target.value)}
+              className={inputClass}
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="text-muted">摘要</span>
+            <input
+              value={form.summary}
+              onChange={(e) => update('summary', e.target.value)}
+              className={inputClass}
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="text-muted">标签（逗号分隔）</span>
+            <input
+              value={form.tags}
+              onChange={(e) => update('tags', e.target.value)}
+              className={inputClass}
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="text-muted">状态</span>
+            <select
+              value={form.status}
+              onChange={(e) => update('status', e.target.value as FormState['status'])}
+              className={inputClass}
+            >
+              <option value="draft">草稿</option>
+              <option value="published">发布</option>
+            </select>
+          </label>
+          <MarkdownEditor
+            value={form.content_md}
+            onChange={(value) => update('content_md', value)}
+          />
+          <Button type="submit" variant="primary">
+            保存
+          </Button>
+        </form>
+      </Surface>
+    </AppShell>
   )
 }

@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { AuthProvider } from '../auth/AuthContext'
 import PostDetailPage from './PostDetailPage'
 
 afterEach(() => {
@@ -11,9 +12,11 @@ afterEach(() => {
 function renderDetail() {
   return render(
     <MemoryRouter initialEntries={['/posts/first']}>
-      <Routes>
-        <Route path="/posts/:slug" element={<PostDetailPage />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/posts/:slug" element={<PostDetailPage />} />
+        </Routes>
+      </AuthProvider>
     </MemoryRouter>,
   )
 }
@@ -22,7 +25,11 @@ describe('PostDetailPage', () => {
   it('渲染文章正文 Markdown', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(
+      vi.fn((input: RequestInfo | URL) => {
+        if (String(input) === '/api/auth/me') {
+          return Promise.resolve(new Response('', { status: 401 }))
+        }
+        return Promise.resolve(
         new Response(
           JSON.stringify({
             id: 1,
@@ -38,7 +45,8 @@ describe('PostDetailPage', () => {
           }),
           { status: 200, headers: { 'Content-Type': 'application/json' } },
         ),
-      ),
+        )
+      }),
     )
 
     renderDetail()
@@ -50,12 +58,17 @@ describe('PostDetailPage', () => {
   it('文章不存在时显示提示', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(
-        new Response('{"code":"not_found","message":"文章不存在"}', {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' },
-        }),
-      ),
+      vi.fn((input: RequestInfo | URL) => {
+        if (String(input) === '/api/auth/me') {
+          return Promise.resolve(new Response('', { status: 401 }))
+        }
+        return Promise.resolve(
+          new Response('{"code":"not_found","message":"文章不存在"}', {
+            status: 404,
+            headers: { 'Content-Type': 'application/json' },
+          }),
+        )
+      }),
     )
 
     renderDetail()
@@ -66,7 +79,11 @@ describe('PostDetailPage', () => {
   it('含特殊字符的标签链接正确编码', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(
+      vi.fn((input: RequestInfo | URL) => {
+        if (String(input) === '/api/auth/me') {
+          return Promise.resolve(new Response('', { status: 401 }))
+        }
+        return Promise.resolve(
         new Response(
           JSON.stringify({
             id: 1,
@@ -82,7 +99,8 @@ describe('PostDetailPage', () => {
           }),
           { status: 200, headers: { 'Content-Type': 'application/json' } },
         ),
-      ),
+        )
+      }),
     )
 
     renderDetail()

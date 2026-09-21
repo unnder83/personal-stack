@@ -4,6 +4,8 @@ import { Link, useParams } from 'react-router-dom'
 import { getPost } from '../api/blog'
 import type { PostDetail } from '../api/blog'
 import { MarkdownView } from '../components/MarkdownView'
+import { AppShell } from '../components/ui/AppShell'
+import { Surface } from '../components/ui/Surface'
 
 export default function PostDetailPage() {
   const { slug = '' } = useParams()
@@ -32,24 +34,50 @@ export default function PostDetailPage() {
     }
   }, [slug])
 
-  if (loading) return <p>加载中...</p>
-  if (error !== '' || post === null) return <p role="alert">{error || '文章不存在'}</p>
+  if (loading) {
+    return (
+      <AppShell>
+        <p className="text-muted">加载中...</p>
+      </AppShell>
+    )
+  }
+  if (error !== '' || post === null) {
+    return (
+      <AppShell>
+        <p role="alert" className="text-accent">
+          {error || '文章不存在'}
+        </p>
+      </AppShell>
+    )
+  }
 
   return (
-    <main>
-      <p>
-        <Link to="/">← 返回列表</Link>
-      </p>
-      <h1>{post.title}</h1>
-      {post.published_at && <time>{post.published_at.slice(0, 10)}</time>}
-      <p>
-        {post.tags.map((tag) => (
-          <Link key={tag.slug} to={`/?tag=${encodeURIComponent(tag.slug)}`}>
-            {tag.name}
-          </Link>
-        ))}
-      </p>
-      <MarkdownView content={post.content_md} />
-    </main>
+    <AppShell>
+      <article className="space-y-6">
+        <Link to="/blog" className="text-sm text-muted hover:text-fg">
+          ← 返回列表
+        </Link>
+        <header className="space-y-2">
+          <h1 className="text-3xl font-semibold tracking-tight">{post.title}</h1>
+          {post.published_at && (
+            <time className="text-xs text-muted">{post.published_at.slice(0, 10)}</time>
+          )}
+          <p className="flex gap-3 text-xs">
+            {post.tags.map((tag) => (
+              <Link
+                key={tag.slug}
+                to={`/?tag=${encodeURIComponent(tag.slug)}`}
+                className="text-accent hover:opacity-80"
+              >
+                {tag.name}
+              </Link>
+            ))}
+          </p>
+        </header>
+        <Surface className="p-6 md:p-8">
+          <MarkdownView content={post.content_md} />
+        </Surface>
+      </article>
+    </AppShell>
   )
 }

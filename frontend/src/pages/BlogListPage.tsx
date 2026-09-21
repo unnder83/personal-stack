@@ -3,6 +3,9 @@ import { Link, useSearchParams } from 'react-router-dom'
 
 import { listPosts, listTags } from '../api/blog'
 import type { PostSummary, Tag } from '../api/blog'
+import { AppShell } from '../components/ui/AppShell'
+import { Button } from '../components/ui/Button'
+import { Surface } from '../components/ui/Surface'
 
 const PAGE_SIZE = 20
 
@@ -53,60 +56,77 @@ export default function BlogListPage() {
   }
 
   return (
-    <main>
-      <header>
-        <h1>personal-stack 博客</h1>
-        <Link to="/drive">网盘</Link>
-        <Link to="/admin/posts">管理后台</Link>
-      </header>
+    <AppShell>
+      <section className="space-y-6">
+        <header className="space-y-4">
+          <h1 className="text-2xl font-semibold tracking-tight">博客</h1>
+          <nav className="flex flex-wrap gap-2">
+            <Button onClick={() => selectTag(null)} disabled={tag === null}>
+              全部
+            </Button>
+            {tags.map((item) => (
+              <Button
+                key={item.slug}
+                onClick={() => selectTag(item.slug)}
+                disabled={tag === item.slug}
+              >
+                {item.name}
+              </Button>
+            ))}
+          </nav>
+        </header>
 
-      <nav>
-        <button onClick={() => selectTag(null)} disabled={tag === null}>
-          全部
-        </button>
-        {tags.map((item) => (
-          <button key={item.slug} onClick={() => selectTag(item.slug)} disabled={tag === item.slug}>
-            {item.name}
-          </button>
-        ))}
-      </nav>
+        {loading && <p className="text-muted">加载中...</p>}
+        {error !== '' && (
+          <p role="alert" className="text-accent">
+            {error}
+          </p>
+        )}
+        {!loading && posts.length === 0 && <p className="text-muted">还没有发布文章</p>}
 
-      {loading && <p>加载中...</p>}
-      {error !== '' && <p role="alert">{error}</p>}
-      {!loading && posts.length === 0 && <p>还没有发布文章</p>}
-
-      <ul>
-        {posts.map((post) => (
-          <li key={post.id}>
-            <h2>
-              <Link to={`/posts/${post.slug}`}>{post.title}</Link>
-            </h2>
-            {post.published_at && <time>{post.published_at.slice(0, 10)}</time>}
-            {post.summary && <p>{post.summary}</p>}
-            <p>
-              {post.tags.map((item) => (
-                <Link key={item.slug} to={`/?tag=${encodeURIComponent(item.slug)}`}>
-                  {item.name}
+        <div className="grid gap-4">
+          {posts.map((post) => (
+            <Surface key={post.id} className="p-6">
+              <h2 className="text-lg font-semibold">
+                <Link to={`/posts/${post.slug}`} className="hover:text-accent">
+                  {post.title}
                 </Link>
-              ))}
-            </p>
-          </li>
-        ))}
-      </ul>
+              </h2>
+              {post.published_at && (
+                <time className="mt-1 block text-xs text-muted">
+                  {post.published_at.slice(0, 10)}
+                </time>
+              )}
+              {post.summary && <p className="mt-3 text-sm text-muted">{post.summary}</p>}
+              <p className="mt-3 flex gap-3 text-xs">
+                {post.tags.map((item) => (
+                  <Link
+                    key={item.slug}
+                    to={`/?tag=${encodeURIComponent(item.slug)}`}
+                    className="text-accent hover:opacity-80"
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </p>
+            </Surface>
+          ))}
+        </div>
 
-      {totalPages > 1 && (
-        <footer>
-          <button onClick={() => gotoPage(page - 1)} disabled={page <= 1}>
-            上一页
-          </button>
-          <span>
-            第 {page} / {totalPages} 页
-          </span>
-          <button onClick={() => gotoPage(page + 1)} disabled={page >= totalPages}>
-            下一页
-          </button>
-        </footer>
-      )}
-    </main>
+        {totalPages > 1 && (
+          <footer className="flex items-center justify-center gap-4 text-sm">
+            <Button onClick={() => gotoPage(page - 1)} disabled={page <= 1}>
+              上一页
+            </Button>
+            <span className="text-muted">
+              第 {page} / {totalPages} 页
+            </span>
+            <Button onClick={() => gotoPage(page + 1)} disabled={page >= totalPages}>
+              下一页
+            </Button>
+          </footer>
+        )}
+      </section>
+    </AppShell>
   )
 }

@@ -10,6 +10,7 @@ grep -q 'job_name: api' deploy/monitoring/prometheus.yml && pass "抓取 api" ||
 python3 -c 'import json; json.load(open("deploy/monitoring/grafana/dashboards/host.json"))' && pass "大盘 JSON 合法" || fail "大盘 JSON 非法"
 grep -q 'profiles: \["monitoring"\]' deploy/compose.yaml && pass "compose 有 monitoring profile" || fail "缺 monitoring profile"
 grep -q 'basic_auth' deploy/Caddyfile && pass "Grafana 有 basic auth" || fail "缺 basic auth"
+grep -q "header_up -Authorization" deploy/Caddyfile && pass "Grafana 代理剥离 Authorization" || fail "Grafana 代理未剥离 Authorization"
 grep -q 'Strict-Transport-Security' deploy/Caddyfile && pass "有 HSTS" || fail "缺 HSTS"
 grep -q 'Content-Security-Policy' deploy/Caddyfile && pass "有 CSP" || fail "缺 CSP"
 grep -q 'ENABLE_MONITORING' deploy/ops/deploy-release.sh && pass "脚本支持监控开关" || fail "脚本缺监控开关"

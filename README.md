@@ -20,6 +20,7 @@
 - 部署：push 到 `main` 自动发布（Release 构建推 GHCR → Deploy 自托管 Runner 拉取部署，健康检查失败自动回滚）
 - 手动触发：Actions → Deploy → Run workflow；详见 `docs/operations.md`
 - 监控：https://stack.personal-stack.ltd/grafana/ （basic auth + Grafana 登录，口令见服务器 `.env`）
+- 界面：访客看博客列表，登录后首页为控制台（博客/网盘入口）；右下角「主题」可切换预设、明暗、主色、圆角、模糊与背景，刷新保留
 - 运维手册：`docs/operations.md`；上线记录：`docs/deploy-notes.md`
 
 ## 快速开始（开发）

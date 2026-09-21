@@ -328,6 +328,9 @@ sudo journalctl -u personal-stack-backup.service -n 20 --no-pager
 ls -lh /srv/stack/backups/db/daily /srv/stack/backups/files
 ```
 
+该服务依次执行两个脚本：`deploy/ops/backup/backup-db.sh`（mysqldump + gzip + 校验）与
+`deploy/ops/backup/backup-files.sh`（rsync 镜像文件目录）。也可以手动单独运行它们排查问题。
+
 产物：
 
 - MySQL：`/srv/stack/backups/db/daily/personal_stack-YYYY-MM-DD.sql.gz`（保留 7 天）+ `weekly/`（周日副本，保留 4 周），权限 600
